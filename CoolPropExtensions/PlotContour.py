@@ -7,6 +7,8 @@ Created on Sat Nov 26 11:36:47 2022
 
 PLot contour of Z and Gamma for given fluid in (P,T) diagram
 """
-
+import matplotlib.pyplot as plt
 from CoolProp.CoolProp import PropsSI
 print(PropsSI('D', 'P', 1E5, 'T', 300, 'nitrogen'))
+
+
