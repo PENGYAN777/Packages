@@ -1,14 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat Nov 26 16:58:00 2022
-
-@author: yan
-"""
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
 Created on Sat Nov 26 16:05:08 2022
 
 @author: yan
@@ -58,7 +50,7 @@ y = np.linspace(1e5, pmax,n)
 X,Y = np.meshgrid(x,y)
 Z =  CP.CoolProp.PropsSI('Z','T',X,'P',Y,fluidname)
 Gamma =  CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics','T',X,'P',Y,fluidname)
-print(Z.shape)
+#print(Z.shape)
 #cnt = ax.contour(X, Y, Z, levels=[0.5,0.6,0.7,1,1.1,1.2, 1.5], cmap=matplotlib.cm.RdGy,vmin=abs(Z).min(), vmax=abs(Z).max(), extent=[0, 1, 0, 1])
 plt.contour(X, Y, Z, [0.5,0.7,0.9,1, 1.1, 1.3, 1.5], cmap='rainbow')
 plt.contourf(X, Y, Gamma, [0.5,0.7,0.9,1, 1.1, 1.3, 1.5], cmap='rainbow')
@@ -82,3 +74,4 @@ plt.xlabel('Temperature [K]')
 plt.title('P-T diagram for siloxane MM')
 plt.tight_layout()
 fig.savefig("Contour.pdf")
+print("plotcontour.py called")
