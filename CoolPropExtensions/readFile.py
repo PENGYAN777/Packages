@@ -13,7 +13,7 @@ import CoolProp as CP
 import pandas as pd
 
 fluidname = "nitrogen"
-data = pd.read_csv("pr.csv", " ")
+data = pd.read_csv("files/pr.csv", " ")
 # get P,T from 2nd and 3rd column 
 P = data.iloc[:,1] * 2e5
 T = data.iloc[:,2] * 300
@@ -29,4 +29,4 @@ ZG =pd.DataFrame({'Z': Z,'Gamma': Gamma})
 newData = pd.concat([data, ZG], join = 'outer', axis = 1)
 
 # save newData in csv file
-newData.to_csv("prNew.csv")
+newData.to_csv("files/prNew.csv")
