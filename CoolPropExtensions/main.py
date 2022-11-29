@@ -8,13 +8,13 @@ Created on Sun Nov 27 11:18:57 2022
 main function of CoolProp extensions
 """
 import os
-
+import CoolProp as CP
 #os.system('python PT_diagram.py')
 os.system('python plotContour.py')
 # new input output pairs
 from newIOpairs import TGfromZP, PGfromZT, PTfromZG, ZPfromTG, ZTfromPG, ZGfromPT
 
-T1,Gamma1 = TGfromZP(0.9, 1e6)
+#T1,Gamma1 = TGfromZP(0.9, 1e6)
 
 #P2,Gamma2 = PGfromZT(0.9,500)
 
@@ -25,4 +25,26 @@ T1,Gamma1 = TGfromZP(0.9, 1e6)
 #Z5, T5  = ZTfromPG(8e6,0.8)
 
 # check consistence of P,T, Z,Gamma
-ZGfromPT(1e6,T1)
+PGfromZT(0.9,200)
+
+# compute active degree of freedom
+print("------------compute N-----------")
+fluidname = "nitrogen"
+R = CP.CoolProp.PropsSI("gas_constant",fluidname)
+print("universal gas constant:  J/mol/K", R)
+W = CP.CoolProp.PropsSI("molar_mass",fluidname)
+print("molar mass: kg/mol", W)
+Rs = R/W
+print("spefific ags constant: J/Kg/K", Rs)
+Tc =  CP.CoolProp.PropsSI("Tcrit",fluidname)
+print("critical temperature[K]:", Tc)
+Pc =  CP.CoolProp.PropsSI("pcrit",fluidname)
+print("critical pressure[Pa]:", Pc)
+w =  CP.CoolProp.PropsSI("acentric",fluidname)
+print("caentric factor:", w)
+cv =CP.CoolProp.PropsSI('Cvmass','T',Tc,'P',Pc/3,fluidname)
+print("isochoric specific heat capacity : 	J/kg/K", cv)
+N = 2*cv/Rs
+print("active degree of freddom:", N)
+Z = CP.CoolProp.PropsSI('Z','T',Tc,'P',Pc/3,fluidname)
+print("Z:",Z)

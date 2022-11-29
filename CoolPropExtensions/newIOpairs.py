@@ -17,9 +17,8 @@ import pandas as pd
 
 
 # give fluid name
-fluidname = "MM"
+fluidname = "nitrogen"
 # update fluid
-
 Tc =  CP.CoolProp.PropsSI("Tcrit",fluidname)
 Tmax =  CP.CoolProp.PropsSI("Tmax",fluidname)
 Pc =  CP.CoolProp.PropsSI("pcrit",fluidname)
@@ -60,8 +59,8 @@ def TGfromZP(Z,P):
 
 # define input pairs (Z,P)
 def PGfromZT(Z,T):
-    #print("fluid name is:", fluidname)
-    #print("input pairs Z,T[K]:" ,Z , T )
+    print("fluid name is:", fluidname)
+    print("input pairs Z,T[K]:" ,Z , T )
     # compute P for given Z,T
     Prange = np.linspace(Pc/5,Pc*5,500)
     Prange = pd.Series(Prange)
@@ -70,10 +69,10 @@ def PGfromZT(Z,T):
         Z_error[i] = CP.CoolProp.PropsSI('Z','P',Prange[i],'T',T,fluidname) - Z
     Z_error = abs(Z_error)
     P = Prange[np.argmin(Z_error)]
-    #print("P[Pa] for given Z,T", P)
-    #print("Z is:", CP.CoolProp.PropsSI('Z','T',T,'P',P,fluidname))
+    print("P[Pa] for given Z,T", P)
+    print("Z is:", CP.CoolProp.PropsSI('Z','T',T,'P',P,fluidname))
     Gamma = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics','T',T,'P',P,fluidname)
-    #print("Gamma is:", Gamma)
+    print("Gamma is:", Gamma)
     return P,Gamma
 
 # define input pairs (Z,Gamma)
