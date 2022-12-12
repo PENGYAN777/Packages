@@ -17,7 +17,7 @@ import pandas as pd
 
 
 # give fluid name
-fluidname = "nitrogen"
+fluidname = "water"
 # update fluid
 Tc =  CP.CoolProp.PropsSI("Tcrit",fluidname)
 Tmax =  CP.CoolProp.PropsSI("Tmax",fluidname)
@@ -62,7 +62,7 @@ def PGfromZT(Z,T):
     print("fluid name is:", fluidname)
     print("input pairs Z,T[K]:" ,Z , T )
     # compute P for given Z,T
-    Prange = np.linspace(Pc/5,Pc*5,500)
+    Prange = np.linspace(Pc/10,Pc*3,1000)
     Prange = pd.Series(Prange)
     Z_error = np.zeros(Prange.size)
     for i in Prange.index:
@@ -80,10 +80,10 @@ def PTfromZG(Z,Gamma):
     #print("fluid name is:", fluidname)
     #print("input pairs Z,Gamma:" ,Z , Gamma )
     # compute P,T for given Z,Gamma
-    Trange = np.linspace(Tc-100,Tmax,500)
+    Trange = np.linspace(Tc+30,Tmax/5,100)
     Trange = pd.Series(Trange)
-    Prange = np.zeros(500)
-    Gammat = np.zeros(500)
+    Prange = np.zeros(100)
+    Gammat = np.zeros(100)
     # loop for P,T
     for i in Trange.index:
         Prange[i], Gammat[i] = PGfromZT(Z, Trange[i])
