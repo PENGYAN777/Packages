@@ -25,8 +25,8 @@ def equations(p,zt,gamma,A):
     t = zt # total compressibility factor
     g = gamma # spefific heat ratio
     
-    return ( M**2-(((z-1)/(t-1))**(1-g)-((g-1)*z+1)/((g-1)*t+1) )/((g-1)/2*g*z*z/((g-1)*z+1))  ,
-            ((z-1)/(t-1))**((g+1)/2) - A*M*( ((g-1)*z+1)/((g-1)*t+1)+ ((g-1)/2*g*z*z/((g-1)*z+1)) )**((1+g)/(2-2*g))  
+    return ( M**2-(((z-1)/(t-1))**(1-g)-((g-1)*z+1)/((g-1)*t+1) )/((g-1)/2*g*z*z/((g-1)*t+1))  ,
+            ((z-1)/(t-1))**((g+1)/2) - A*M*( ((g-1)*z+1)/((g-1)*t+1)+ ((g-1)/2*g*z*z/((g-1)*t+1)) )**((1+g)/(2-2*g))  
             )
     
 # vector of Zt
