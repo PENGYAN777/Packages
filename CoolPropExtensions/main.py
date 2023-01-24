@@ -25,11 +25,11 @@ from newIOpairs import TGfromZP, PGfromZT, PTfromZG, ZPfromTG, ZTfromPG, ZGfromP
 #Z5, T5  = ZTfromPG(8e6,0.8)
 
 # check consistence of P,T, Z,Gamma
-PGfromZT(0.61,600)
+PGfromZT(0.5,160)
 
 # compute active degree of freedom
 print("------------compute N-----------")
-fluidname = "water"
+fluidname = "MM"
 R = CP.CoolProp.PropsSI("gas_constant",fluidname)
 print("universal gas constant:  J/mol/K", R)
 W = CP.CoolProp.PropsSI("molar_mass",fluidname)
@@ -48,3 +48,9 @@ N = 2*cv/Rs
 print("active degree of freddom:", N)
 Z = CP.CoolProp.PropsSI('Z','T',Tc,'P',Pc/10,fluidname)
 print("Z:",Z)
+
+Z = CP.CoolProp.PropsSI('Z','T',542.13,'P',9.04e5,"MDM")
+print("Z:",Z)
+G = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics','T',542.13,'P',9.04e5,"MDM")
+print("G:",G)
+

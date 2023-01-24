@@ -17,7 +17,7 @@ import pandas as pd
 
 
 # give fluid name
-fluidname = "nitrogen"
+fluidname = "MM"
 # update fluid
 Tc =  CP.CoolProp.PropsSI("Tcrit",fluidname)
 Tmax =  CP.CoolProp.PropsSI("Tmax",fluidname)
