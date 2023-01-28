@@ -29,7 +29,7 @@ PGfromZT(0.5,160)
 
 # compute active degree of freedom
 print("------------compute N-----------")
-fluidname = "MM"
+fluidname = "MDM"
 R = CP.CoolProp.PropsSI("gas_constant",fluidname)
 print("universal gas constant:  J/mol/K", R)
 W = CP.CoolProp.PropsSI("molar_mass",fluidname)
@@ -42,7 +42,8 @@ Pc =  CP.CoolProp.PropsSI("pcrit",fluidname)
 print("critical pressure[Pa]:", Pc)
 w =  CP.CoolProp.PropsSI("acentric",fluidname)
 print("caentric factor:", w)
-cv =CP.CoolProp.PropsSI('Cvmass','T',Tc,'P',Pc/10,fluidname)
+cv =CP.CoolProp.PropsSI('Cvmass','T',550,'P',8e5,fluidname)
+cp =CP.CoolProp.PropsSI('Cpmass','T',550,'P',8e5,fluidname)
 print("isochoric specific heat capacity : 	J/kg/K", cv)
 N = 2*cv/Rs
 print("active degree of freddom:", N)
