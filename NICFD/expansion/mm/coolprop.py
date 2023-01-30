@@ -23,7 +23,7 @@ from RK4 import rk4
 """
 0. fluid property
 """
-fluidname = "Toluene"
+fluidname = "MM"
 print("Fluid name:", fluidname)
 R = CP.CoolProp.PropsSI("gas_constant",fluidname)
 print("universal gas constant:  J/mol/K", R)
@@ -40,18 +40,21 @@ dc = CP.CoolProp.PropsSI('Dmass','P',Pc,'T',Tc,fluidname)
 1. input total conditions
 """
 
-pt = 2.01*Pc # total pressure
-tt = 1.07*Tc
+# pt = Pc*0.8 # total pressure
+# zt = 0.9
+# pt = Pc*0.8 # total pressure
+# zt = 0.8
+pt = Pc*1.1 # total pressure
+zt = 0.7
+tt,gt = TGfromZP(zt,pt)
 dt = CP.CoolProp.PropsSI('Dmass','P|gas',pt,'T',tt,fluidname) 
 s = CP.CoolProp.PropsSI('Smass','P',pt,'T',tt,fluidname) 
 ht = CP.CoolProp.PropsSI('Hmass','P',pt,'T',tt,fluidname) 
-Zt = CP.CoolProp.PropsSI('Z','P',pt,'T',tt,fluidname) 
-print("Zt:",Zt)
 """
 2. compute isentropic relationship
 """
 
-p = np.linspace(Pc*1.1,pt,1000) # pressure 
+p = np.linspace(Pc*1.1,Pc*2.0,1000) # pressure 
 p = pd.Series(p)
 Z = np.zeros(p.size) # P/rho RT
 h = np.zeros(p.size) # enthalpy
@@ -96,11 +99,11 @@ p = p/Pc
 D = 1/V/dc
 t = T/Tc
 
-pd.DataFrame(p).to_csv('z34.csv', index_label = "Index", header  = ['pressure']) 
-data = pd.read_csv("z34.csv", ",")
+pd.DataFrame(p).to_csv('z7.csv', index_label = "Index", header  = ['pressure']) 
+data = pd.read_csv("z7.csv", ",")
 # append new columns
 D =pd.DataFrame({'density': D, 'temperature': T, 'Mach': M,'nu': nu})
 newData = pd.concat([data, D], join = 'outer', axis = 1)
 # save newData in csv file
 # newData.to_csv("m4sh.csv")
-newData.to_csv("z34.csv")
+newData.to_csv("z7.csv")
