@@ -94,11 +94,11 @@ p = p/Pc
 D = 1/V/dc
 t = T/Tc
 
-pd.DataFrame(p).to_csv('z6.csv', index_label = "Index", header  = ['pressure']) 
-data = pd.read_csv("z6.csv", ",")
+pd.DataFrame(p).to_csv('z34.csv', index_label = "Index", header  = ['pressure']) 
+data = pd.read_csv("z34.csv", ",")
 # append new columns
 D =pd.DataFrame({'density': D, 'temperature': T, 'Mach': M,'nu': nu})
 newData = pd.concat([data, D], join = 'outer', axis = 1)
 # save newData in csv file
 # newData.to_csv("m4sh.csv")
-newData.to_csv("z6.csv")
+newData.to_csv("z34.csv")

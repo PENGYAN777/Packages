@@ -17,7 +17,7 @@ import pandas as pd
 
 
 # give fluid name
-fluidname = "nitrogen"
+fluidname = "MM"
 # update fluid
 Tc =  CP.CoolProp.PropsSI("Tcrit",fluidname)
 Tmax =  CP.CoolProp.PropsSI("Tmax",fluidname)
@@ -43,7 +43,7 @@ def TGfromZP(Z,P):
     print("fluid name is:", fluidname)
     print("input pairs Z,P[Pa]:" ,Z , P )
     # compute T for given Z,P
-    Trange = np.linspace(Tc,300,500)
+    Trange = np.linspace(Tc-100,Tmax,500)
     Trange = pd.Series(Trange)
     Z_error = np.zeros(Trange.size)
     for i in Trange.index:
