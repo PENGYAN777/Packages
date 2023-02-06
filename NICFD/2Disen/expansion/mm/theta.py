@@ -110,9 +110,9 @@ fig2.savefig("P2_theta.pdf")
 fig3 = plt.figure( dpi=300)
 lwh = 2
 axes = fig3.add_axes([0.15, 0.15, 0.7, 0.7]) #size of figure
-axes.plot(theta , z9_T2/518.75 , 'k', lw=lwh, label="$Z_t = 0.9$")
-axes.plot(theta , z8_T2/518.75 , 'r', lw=lwh, label="$Z_t = 0.8$")
-axes.plot(theta , z7_T2/518.75 , 'b', lw=lwh, label="$Z_t = 0.7$")
+axes.plot(theta , z9_T2 , 'k', lw=lwh, label="$Z_t = 0.9$")
+axes.plot(theta , z8_T2 , 'r', lw=lwh, label="$Z_t = 0.8$")
+axes.plot(theta , z7_T2 , 'b', lw=lwh, label="$Z_t = 0.7$")
 
 
 axes.set_xlabel('$\\theta$(rad)',fontsize=12)
