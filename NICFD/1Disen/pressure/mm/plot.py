@@ -71,7 +71,7 @@ axes.set_xlabel('$P/P_t$',fontsize=12)
 axes.set_ylabel('Mach',fontsize=12) 
 axes.set_title('Mach vs $P/P_t$',fontsize=14)
 axes.legend(loc=0 , prop={'size': 10}) # 
-fig3.savefig("isen_m.pdf")
+fig4.savefig("isen_m.pdf")
 
 fig5 = plt.figure( dpi=300)
 lwh = 2
@@ -84,7 +84,7 @@ axes.set_xlabel('$P/P_t$',fontsize=12)
 axes.set_ylabel('Z',fontsize=12) 
 axes.set_title('Z vs $P/P_t$',fontsize=14)
 axes.legend(loc=0 , prop={'size': 10}) # 
-fig3.savefig("isen_z.pdf")
+fig5.savefig("isen_z.pdf")
 
 fig6 = plt.figure( dpi=300)
 lwh = 2
@@ -97,7 +97,7 @@ axes.set_xlabel('$P/P_t$',fontsize=12)
 axes.set_ylabel('$\\Gamma$',fontsize=12) 
 axes.set_title('$\\Gamma$ vs $P/P_t$',fontsize=14)
 axes.legend(loc=0 , prop={'size': 10}) # 
-fig3.savefig("isen_g.pdf")
+fig6.savefig("isen_g.pdf")
 
 fig7 = plt.figure( dpi=300)
 lwh = 2
@@ -111,4 +111,4 @@ axes.set_xlabel('$P/P_t$',fontsize=12)
 axes.set_ylabel('$A/A^*$',fontsize=12) 
 axes.set_title('$A/A^*$ vs $P/P_t$',fontsize=14)
 axes.legend(loc=0 , prop={'size': 10}) # 
-fig3.savefig("isen_A.pdf")
+fig7.savefig("isen_A.pdf")

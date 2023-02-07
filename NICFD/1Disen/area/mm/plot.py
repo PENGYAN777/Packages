@@ -47,7 +47,7 @@ axes.set_xlabel('$X[mm]$',fontsize=12)
 axes.set_ylabel('$P/P_t$',fontsize=12) 
 axes.set_title('$P/P_t$ vs $X$',fontsize=14)
 axes.legend(loc=0 , prop={'size': 10}) # 
-fig1.savefig("P.pdf")
+fig2.savefig("P.pdf")
 
 fig3 = plt.figure( dpi=300)
 lwh = 2
@@ -61,7 +61,7 @@ axes.set_xlabel('$X[mm]$',fontsize=12)
 axes.set_ylabel('$\\rho/\\rho_t$',fontsize=12) 
 axes.set_title('$\\rho/\\rho_t$ vs $X$',fontsize=14)
 axes.legend(loc=0 , prop={'size': 10}) # 
-fig1.savefig("rho.pdf")
+fig3.savefig("rho.pdf")
 
 fig4 = plt.figure( dpi=300)
 lwh = 2
@@ -75,7 +75,7 @@ axes.set_xlabel('$X[mm]$',fontsize=12)
 axes.set_ylabel('$T/T_t$',fontsize=12) 
 axes.set_title('$T/T_t$ vs $X$',fontsize=14)
 axes.legend(loc=0 , prop={'size': 10}) # 
-fig1.savefig("T.pdf")
+fig4.savefig("T.pdf")
 
 fig5 = plt.figure( dpi=300)
 lwh = 2
@@ -89,7 +89,7 @@ axes.set_xlabel('$X[mm]$',fontsize=12)
 axes.set_ylabel('$Z$',fontsize=12) 
 axes.set_title('$Z$ vs $X$',fontsize=14)
 axes.legend(loc=0 , prop={'size': 10}) # 
-fig1.savefig("Z.pdf")
+fig5.savefig("Z.pdf")
 
 fig6 = plt.figure( dpi=300)
 lwh = 2
@@ -103,4 +103,4 @@ axes.set_xlabel('$X[mm]$',fontsize=12)
 axes.set_ylabel('$\\Gamma$',fontsize=12) 
 axes.set_title('$\\Gamma$ vs $X$',fontsize=14)
 axes.legend(loc=0 , prop={'size': 10}) # 
-fig1.savefig("G.pdf")
+fig6.savefig("G.pdf")

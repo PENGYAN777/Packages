@@ -40,8 +40,8 @@ total conditions
 """
 
 pt = 1.3e6 # total pressure
+zt = 0.6     # total compressibility factor
 print("total pressure[Pa]:", pt)
-zt = 0.6 # total compressibility factor
 print("total compressibility factor", zt)
 tt,gt = TGfromZP(zt, pt)
 # tt = 500 #total temprature
