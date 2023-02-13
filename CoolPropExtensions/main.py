@@ -50,8 +50,9 @@ print("active degree of freddom:", N)
 Z = CP.CoolProp.PropsSI('Z','T',Tc,'P',Pc/10,fluidname)
 print("Z:",Z)
 
-Z = CP.CoolProp.PropsSI('Z','T',542.13,'P',9.04e5,"MDM")
+Z = CP.CoolProp.PropsSI('Z','T',330,'P',8e6,"CO2")
 print("Z:",Z)
-G = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics','T',542.13,'P',9.04e5,"MDM")
-print("G:",G)
+# G = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics','T',542.13,'P',9.04e5,"MDM")
+# print("G:",G)
+
 

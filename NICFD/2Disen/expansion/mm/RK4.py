@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import math
 import CoolProp as CP
 
-fluidname = "Toluene"
+fluidname = "MM"
 
 # function to be solved
 def f1(v,M):
