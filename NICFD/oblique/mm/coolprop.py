@@ -10,19 +10,17 @@ input: upstream P,T,M.
 
 """
 
-from scipy.optimize import fsolve
 import math
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.ticker import FormatStrFormatter
 import CoolProp as CP
+from sympy import sin, cos, tan
 
 
 """
 0. fluid property
 """
-fluidname = "MM"
+fluidname = "nitrogen"
 print("Fluid name:", fluidname)
 R = CP.CoolProp.PropsSI("gas_constant",fluidname)
 print("universal gas constant:  J/mol/K", R)
@@ -41,7 +39,7 @@ dc = CP.CoolProp.PropsSI('Dmass','P',Pc,'T',Tc,fluidname)
 
 
 P1 = Pc*0.4 # pre-shock pressure
-T1 = Tc*1.2 # pre-shcok temperature
+T1 = Tc*3 # pre-shcok temperature
 d1 = CP.CoolProp.PropsSI('Dmass','P',P1,'T',T1,fluidname) # pre-shock density
 Z1 = CP.CoolProp.PropsSI('Z','P',P1,'T',T1,fluidname) 
 G1 = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics','P',P1,'T',T1,fluidname) 
@@ -53,9 +51,7 @@ print("gamma:", cp/cv)
 M1 = 2
 c1 = CP.CoolProp.PropsSI('A','P',P1,'T',T1,fluidname)
 U1 = M1*c1
-theta = 30*math.pi/180 # deflection angle (rad) 
-u1 = U1*math.sin(theta)
-v1 = U1*math.cos(theta)
+delta = 10*math.pi/180 # deflection angle (rad) 
 h1 = CP.CoolProp.PropsSI('Hmass','P',P1,'T',T1,fluidname) 
 ht1 = h1 + 0.5*U1*U1
 print("ht:", ht1)
@@ -66,34 +62,48 @@ htotal1 = CP.CoolProp.PropsSI('Hmass','P',Pt1,'T',Tt1,fluidname)
 print("ht1:", htotal1)
 
 """
-2. compute post-shock properites
+2. compute post-shock properitesi
 """
 
-# p2 = np.linspace(P1*2,P1*4.2 ,1000) # post-shock pressure 
-# p2 = pd.Series(p2)
-# u2 = np.zeros(p2.size) 
-# d2 = np.zeros(p2.size) 
-# diff = np.zeros(p2.size) 
- 
-# for i in p2.index:
-#     if abs(p2[i]-Pc)<0.01*Pc:
-#         p2[i] = 0.99*Pc
-#     u2[i] = (P1+d1*u1*u1-p2[i])/d1/u1
-#     d2[i] =  d1*u1/u2[i]
-#     diff[i] = ht1 - 0.5*u2[i]*u2[i] - CP.CoolProp.PropsSI('Hmass','P',p2[i],'Dmass',d2[i],fluidname) 
-# print("min diff:", diff[np.argmin(abs(diff))])
-# P2 = p2[np.argmin(abs(diff))]
-# D2 = d2[np.argmin(abs(diff))]    
-# T2 = CP.CoolProp.PropsSI('T','P',P2,'Dmass',D2,fluidname) 
-# c2 = CP.CoolProp.PropsSI('A','P',P2,'T',T2,fluidname) 
-# U2 = u2[np.argmin(abs(diff))]    
-# M2 = U2/c2
-# h2 = CP.CoolProp.PropsSI('Hmass','P',P2,'Dmass',D2,fluidname) 
-# htotal2 = h2 + 0.5*U2*U2
-# print("ht2:", htotal2)
-# print("(ht2-ht1)/ht1:", (htotal2-htotal1)/htotal1)
-# print("M2:", M2)
-# print("P2/P1:", P2/P1)
+p2 = np.linspace(P1*4,P1*5,100) # post-shock pressure 
+p2 = pd.Series(p2)
+u2 = np.zeros(p2.size) 
+d2 = np.zeros(p2.size) 
+diff1 = np.zeros(p2.size)
+n = 100 
+diff2 = np.zeros(n) 
+theta2 = np.zeros(n) 
+theta1 = np.zeros(p2.size)
+for i in p2.index:
+    if abs(p2[i]-Pc)<0.01*Pc:
+        p2[i] = 0.99*Pc
+    # solve theta
+    for j in range(n):
+        theta2[j] = np.arcsin(1/M1) + (math.pi/2 - np.arcsin(1/M1))/n*j
+        x = theta2[j]
+        diff2[j] = d1*U1*U1*sin(x)*sin(x)*tan(x-delta) - tan(x)*(P1+d1*U1*U1*sin(x)*sin(x)-p2[i])
+    theta1[i] = theta2[np.argmin(abs(diff2))]
+    y = theta1[i]
+    u2[i] = (P1+d1*U1*U1*sin(y)*sin(y)-p2[i])/d1/U1/sin(y)   
+    if u2[i]>0:
+        d2[i] =  d1*U1*sin(y)/u2[i]
+        diff1[i] = ht1 - 0.5*u2[i]*u2[i] -0.5*U1*U1*cos(y)*cos(y) - CP.CoolProp.PropsSI('Hmass','P',p2[i],'Dmass',d2[i],fluidname) 
+print("min diff:", diff1[np.argmin(abs(diff1))])
+theta = theta1[np.argmin(abs(diff1))]
+P2 = p2[np.argmin(abs(diff1))]
+D2 = d2[np.argmin(abs(diff1))]    
+T2 = CP.CoolProp.PropsSI('T','P',P2,'Dmass',D2,fluidname) 
+c2 = CP.CoolProp.PropsSI('A','P',P2,'T',T2,fluidname) 
+U2 = u2[np.argmin(abs(diff1))]**2 + U1*U1*cos(theta)*cos(theta) 
+U2 = math.sqrt(U2)   
+M2 = U2/c2
+h2 = CP.CoolProp.PropsSI('Hmass','P',P2,'Dmass',D2,fluidname) 
+htotal2 = h2 + 0.5*U2*U2
+print("ht2:", htotal2)
+print("(ht2-ht1)/ht1:", (htotal2-htotal1)/htotal1)
+print("M2:", M2)
+print("shck angle (degree):", theta*180/math.pi)
+print("P2/P1:", P2/P1)
 # print("T2/T1:", T2/T1)
 # print("D2/D1:", D2/d1)
 # s2 = CP.CoolProp.PropsSI('Smass','P',P2,'T',T2,fluidname) 
