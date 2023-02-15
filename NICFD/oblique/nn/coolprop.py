@@ -20,7 +20,7 @@ from sympy import sin, cos, tan
 """
 0. fluid property
 """
-fluidname = "MM"
+fluidname = "nitrogen"
 print("Fluid name:", fluidname)
 R = CP.CoolProp.PropsSI("gas_constant",fluidname)
 print("universal gas constant:  J/mol/K", R)
@@ -38,8 +38,8 @@ dc = CP.CoolProp.PropsSI('Dmass','P',Pc,'T',Tc,fluidname)
 """
 
 
-P1 = Pc*0.4  # pre-shock pressure
-T1 = Tc*1.2 # pre-shcok temperature
+P1 = Pc*0.4 # pre-shock pressure
+T1 = Tc*3 # pre-shcok temperature
 d1 = CP.CoolProp.PropsSI('Dmass','P',P1,'T',T1,fluidname) # pre-shock density
 Z1 = CP.CoolProp.PropsSI('Z','P',P1,'T',T1,fluidname) 
 G1 = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics','P',P1,'T',T1,fluidname) 
@@ -65,7 +65,7 @@ print("ht1:", htotal1)
 2. compute post-shock properitesi
 """
 
-p2 = np.linspace(P1*1.1,P1*2,100) # post-shock pressure 
+p2 = np.linspace(P1*4,P1*5,100) # post-shock pressure 
 p2 = pd.Series(p2)
 u2 = np.zeros(p2.size) 
 d2 = np.zeros(p2.size) 
