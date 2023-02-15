@@ -16,7 +16,6 @@ read csv file
 """
 
 z10= pd.read_csv("z10.csv", ",", skiprows=0)
-z10 = z10[:-1]
 """
 plot 
 """

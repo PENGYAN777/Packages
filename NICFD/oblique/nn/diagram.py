@@ -63,14 +63,14 @@ print("ht1:", htotal1)
 """
 2. compute post-shock properitesi
 """
-n1 = 20
+n1 = 60
 
 beta = np.zeros(n1) #  
 theta = np.zeros(n1) # beta
 for k in range(n1):
-    beta[k] = np.arcsin(1/M1) + (50/180*math.pi-np.arcsin(1/M1))*k/n1 # shock angle (rad) 
+    beta[k] = np.arcsin(1/M1) + (90/180*math.pi-np.arcsin(1/M1))*k/n1 # shock angle (rad) 
     b = beta[k]
-    p2 = np.linspace(P1*(1.01+k/n1),P1*(1.5+k/n1*2),1000) # post-shock pressure 
+    p2 = np.linspace(P1*(1.01+k/n1),P1*(2+k/n1*3),1000) # post-shock pressure 
     p2 = pd.Series(p2)
     u2 = np.zeros(p2.size) 
     d2 = np.zeros(p2.size) 
@@ -105,7 +105,8 @@ for k in range(n1):
     theta[k] = theta1[np.argmin(abs(diff_theta))]
     print("deflection angle (degree):", theta[k]*180/math.pi)
 
-
+theta = np.append(theta, [0])
+beta = np.append(beta, [math.pi/2])
 
 """
 # 3. write files
