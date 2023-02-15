@@ -40,7 +40,7 @@ dc = CP.CoolProp.PropsSI('Dmass','P',Pc,'T',Tc,fluidname)
 
 
 P1 = Pc*0.8 # pre-shock pressure
-Z1 = 0.9
+Z1 = 0.7
 T1, G1=  TGfromZP(Z1,P1)# pre-shcok temperature
 d1 = CP.CoolProp.PropsSI('Dmass','P',P1,'T',T1,fluidname) # pre-shock density
 print("Z,Gamma:", Z1,G1)
@@ -68,7 +68,9 @@ theta = np.zeros(n1) # beta
 for k in range(n1):
     beta[k] = np.arcsin(1/M1) + (90/180*math.pi-np.arcsin(1/M1))*k/n1 # shock angle (rad) 
     b = beta[k]
-    p2 = np.linspace(P1*(1.01+k/n1),P1*(1.5+k/n1*3),1000) # post-shock pressure 
+    # p2 = np.linspace(P1*(1.01+k/n1),P1*(1.5+k/n1*3),1000) # Z = 0.9
+    # p2 = np.linspace(P1*(1.01+k/n1),P1*(1.5+k/n1*2.5),1000) # Z = 0.8
+    p2 = np.linspace(P1*(1.01+k/n1),P1*(1.5+k/n1*2.2),1000) # Z = 0.7
     p2 = pd.Series(p2)
     u2 = np.zeros(p2.size) 
     d2 = np.zeros(p2.size) 
@@ -109,12 +111,12 @@ beta = np.append(beta, [math.pi/2])
 """
 # 3. write files
 # """
-pd.DataFrame(theta).to_csv('z9.csv', index_label = "Index", header  = ['theta']) 
-data = pd.read_csv("z9.csv", ",")
+pd.DataFrame(theta).to_csv('z7.csv', index_label = "Index", header  = ['theta']) 
+data = pd.read_csv("z7.csv", ",")
 # append new columns
 D =pd.DataFrame({ 'beta': beta })
 newData = pd.concat([data, D], join = 'outer', axis = 1)
 # save newData in csv file
 # newData.to_csv("m4sh.csv")
-newData.to_csv("z9.csv")
+newData.to_csv("z7.csv")
 
