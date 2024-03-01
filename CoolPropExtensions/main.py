@@ -25,7 +25,6 @@ from newIOpairs import TGfromZP, PGfromZT, PTfromZG, ZPfromTG, ZTfromPG, ZGfromP
 #Z5, T5  = ZTfromPG(8e6,0.8)
 
 # check consistence of P,T, Z,Gamma
-PGfromZT(0.5,160)
 
 # compute active degree of freedom
 print("------------compute N-----------")
@@ -39,20 +38,20 @@ print("spefific ags constant: J/Kg/K", Rs)
 Tc =  CP.CoolProp.PropsSI("Tcrit",fluidname)
 print("critical temperature[K]:", Tc)
 Pc =  CP.CoolProp.PropsSI("pcrit",fluidname)
-print("critical pressure[Pa]:", Pc)
-w =  CP.CoolProp.PropsSI("acentric",fluidname)
-print("caentric factor:", w)
-cv =CP.CoolProp.PropsSI('Cvmass','T',550,'P',8e5,fluidname)
-cp =CP.CoolProp.PropsSI('Cpmass','T',550,'P',8e5,fluidname)
-print("isochoric specific heat capacity : 	J/kg/K", cv)
-N = 2*cv/Rs
-print("active degree of freddom:", N)
-Z = CP.CoolProp.PropsSI('Z','T',Tc,'P',Pc/10,fluidname)
+# print("critical pressure[Pa]:", Pc)
+# w =  CP.CoolProp.PropsSI("acentric",fluidname)
+# print("caentric factor:", w)
+# cv =CP.CoolProp.PropsSI('Cvmass','T',550,'P',8e5,fluidname)
+# cp =CP.CoolProp.PropsSI('Cpmass','T',550,'P',8e5,fluidname)
+# print("isochoric specific heat capacity : 	J/kg/K", cv)
+# N = 2*cv/Rs
+# print("active degree of freddom:", N)
+# Z = CP.CoolProp.PropsSI('Z','T',Tc,'P',Pc/10,fluidname)
+# print("Z:",Z)
+T = Tc*1.05
+Z,P=ZPfromTG(T,0.5)
 print("Z:",Z)
-
-Z = CP.CoolProp.PropsSI('Z','T',330,'P',8e6,"CO2")
-print("Z:",Z)
-# G = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics','T',542.13,'P',9.04e5,"MDM")
-# print("G:",G)
+G = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics','T',T,'P',P,fluidname)
+print("G:",G)
 
 
