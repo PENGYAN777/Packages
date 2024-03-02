@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Mar  1 16:30:25 2024
+Created on Sat Mar  2 22:33:59 2024
 
-plot (P,v) diagram. 
+plot RH, Rayleigh line
 
 @author: yan
 """
-# G = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics', 'P',P,'T', T,fluidname)
-# P = CP.CoolProp.PropsSI('P','T', T, 'Q', 1,  fluidname)
 
 import matplotlib
 import numpy as np
@@ -32,8 +30,6 @@ print("molar mass:", MW)
 Rs = R/MW
 print("specific gas constant:", Rs)
 
-
-
 # ----------------
 # Saturation curve
 # ---------------
@@ -45,39 +41,6 @@ vsl = 1/dsl
 psv = np.linspace(Pc*0.5, Pc*1.0, 500)
 dsv = CP.CoolProp.PropsSI('Dmass','P',psv,'Q',1,fluidname)
 vsv = 1/dsv
-
-
-
-# ----------------
-# isentropes
-# ---------------
-# s1
-v1 = vc*2.5
-p1 = Pc*1.05
-s1 = CP.CoolProp.PropsSI('Smass','P', p1, 'Dmass', 1/v1,  fluidname)
-
-v1 = np.linspace(vc*0.5, vc*4.5,500) # P<Pc
-v1 = pd.Series(v1)
-p1 = np.zeros(v1.size) 
-for i in v1.index:
-    p1[i] = CP.CoolProp.PropsSI('P','Smass', s1-190, 'Dmass', 1/v1[i],  fluidname)
-    
-
-# s2
-v2 = np.linspace(vc*0.5, vc*4.5,500) # P<Pc
-v2 = pd.Series(v2)
-p2 = np.zeros(v2.size) 
-for i in v1.index:
-    p2[i] = CP.CoolProp.PropsSI('P','Smass', s1-100, 'Dmass', 1/v2[i],  fluidname)
-    
-# s3
-v3 = np.linspace(vc*0.5, vc*4.5,500) # P<Pc
-v3 = pd.Series(v3)
-p3 = np.zeros(v3.size) 
-for i in v3.index:
-    p3[i] = CP.CoolProp.PropsSI('P','Smass', s1-175, 'Dmass', 1/v3[i],  fluidname)
-
-
 
 # ----------------
 # Gamma=0 curve
@@ -104,47 +67,73 @@ for i in vg.index:
 pg0 = np.asarray(pg0) # convert list to array
 vg0 = np.asarray(vg0)
 
+# ---------------
+# initial state1, P,v, M
+P1 = Pc*0.7
+d1 = CP.CoolProp.PropsSI('Dmass','P',P1,'Q',1,fluidname)/1.3
+v1 = 1/d1
+# v1 = 1/d1
+c1 = CP.CoolProp.PropsSI('A','P', P1, 'Dmass', d1,  fluidname)
+h1 =  CP.CoolProp.PropsSI('Hmass','P', P1, 'Dmass', d1,  fluidname)
 
-        
+# ----------------
+# RH line, use Eq. (2.2)
+n1 = 50
+P2 = np.linspace(Pc*0.6, Pc*1.25 ,n1) # post-shock Mach
+P2 = pd.Series(P2)
+v2 = np.zeros(P2.size) 
+for j in P2.index:
+    P = P2[j]
+    # initial guess pf v2
+    n2 = 150
+    v = np.linspace(vc*1.1,vc*4.5 ,n2) 
+    v = pd.Series(v)
+    diff = np.zeros(v.size) 
+    for i in v.index:
+        diff[i] = CP.CoolProp.PropsSI('Hmass','P', P, 'Dmass', 1/v[i], fluidname) - h1 - 0.5*(P-P1)*(v1+v[i])
+    # print("min index:", np.argmin(abs(diff)), "min diff: ", diff[np.argmin(abs(diff))])
+    v2[j] = v[np.argmin(abs(diff))]
+# ----------------
+# Rayleigh line, use Eq. (2.4)
+M1 = 1.3
+u1 = M1*c1
+v2r = np.zeros(P2.size) # v2 for Rayleigh line
+for i in P2.index:
+     P = P2[i]
+     v2r[i] = (1-(P-P1)*v1/u1/u1)*v1
+
 
 
 # ----------------
 # Plot
 # ---------------
-
-
-# fillcolor = 'g'
-
-# fig = plt.figure(figsize = (6,6))
-# ax = fig.add_subplot(111)
 fig1 = plt.figure( dpi=300)
 lwh = 2
 axes = fig1.add_axes([0.15, 0.15, 0.7, 0.7]) #size of figure
-lw = 2
+lw = 2        
+
 # LVS
 axes.plot(vsl/vc,psl/Pc,'k',lw = lw, label = "LVS")
 axes.plot(vsv/vc,psv/Pc,'k',lw = lw)
 
-# isentrope
+# Gamma = 0 curve
+axes.plot(vg0/vc,pg0/Pc,'r',lw = lw, label = "$\Gamma=0$")
 
-axes.plot(v1/vc,p1/Pc,'k--',lw = lw/2)
-axes.plot(v2/vc,p2/Pc,'k--',lw = lw/2)
-axes.plot(v3/vc,p3/Pc,'k--',lw = lw/2,label="isentropes")
-# Labels
-plt.text(2.8, 0.8, '$s=s_\\tau$',ha= 'center', size = 10)
+# # initial state
+axes.plot(1/d1/vc,P1/Pc,'bo',lw = lw/2, label = "IS")
+# # axes.plot(1/d3/vc,P3/Pc,'bo',lw = lw/2)
 
+# # RHL
+axes.plot(v2/vc,P2/Pc,'b',lw = lw, label = "RHL")
 
-# criticla point
-axes.plot(vc/vc,Pc/Pc,'ko',lw = lw , label = "Critical point")
+# Rayleigh line
+# pos = [0,int(n1/2),n1-1]
+axes.plot(v2r/vc,P2/Pc,'b--',lw = lw, label = "RL")
 
-# Gamma  curve
-axes.plot(vg0/vc,pg0/Pc,'b',lw = lw, label = "$\Gamma=0$")
-
-
-axes.set_ylim([0.5, 1.2])
-# axes.set_xlim([0.5, 4.0])
+# axes.set_ylim([0.5, 1.2])
+# axes.set_xlim([0.5, 2.5])
 axes.set_xlabel('$v/v_c$')
 axes.set_ylabel('$P/P_c$')
-plt.title('Pv diagram for siloxane MD$_4$M')
+plt.title('RHL and Rayleigh line')
 axes.legend(loc=0) # 2 means left top
-fig1.savefig("LSV.pdf") 
+fig1.savefig("RHL_Classical.pdf") 
