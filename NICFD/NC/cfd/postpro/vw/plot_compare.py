@@ -35,7 +35,7 @@ dc = CP.CoolProp.PropsSI('rhocrit',fluidname)
 # mesh1 = pd.read_csv("m1new.csv", ",", skiprows=0)
 # mesh2 = pd.read_csv("m2new.csv", ",", skiprows=0)
 # mesh3 = pd.read_csv("m3new.csv", ",", skiprows=0)
-mesh4 = pd.read_csv("m4new.csv", ",", skiprows=0)
+mesh4 = pd.read_csv("m4.csv", ",", skiprows=0)
 
 
 
@@ -46,7 +46,7 @@ axes = fig1.add_axes([0.15, 0.15, 0.7, 0.7]) #size of figure
 # axes.plot(mesh0.iloc[:,-6] , mesh0.iloc[:,7]/Pc, 'k', lw=lwh, label="5k")
 # axes.plot(mesh2.iloc[:,-6] , mesh2.iloc[:,7]/Pc, 'r', lw=lwh, label="12k")
 # axes.plot(mesh3.iloc[:,-6] , mesh3.iloc[:,7]/Pc, 'g', lw=lwh, label="18k")
-axes.plot(mesh4.iloc[:,-6] , mesh4.iloc[:,7]/Pc, 'b', lw=lwh, label="40k")
+axes.plot(mesh4.iloc[:,-3] , mesh4.iloc[:,6]/Pc, 'b', lw=lwh, label="40k")
 axes.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 # sub_axes = plt.axes([0.26, 0.26, 0.25, 0.25]) 
 
@@ -69,7 +69,7 @@ axes = fig2.add_axes([0.15, 0.15, 0.7, 0.7]) #size of figure
 # axes.plot(mesh0.iloc[:,-6] , mesh0.iloc[:,3], 'k', lw=lwh, label="5k")
 # axes.plot(mesh2.iloc[:,-6] , mesh2.iloc[:,3], 'r', lw=lwh, label="12k")
 # axes.plot(mesh3.iloc[:,-6] , mesh3.iloc[:,3], 'g', lw=lwh, label="18k")
-axes.plot(mesh4.iloc[:,-6] , mesh4.iloc[:,3], 'b', lw=lwh, label="40k")
+axes.plot(mesh4.iloc[:,-3] , mesh4.iloc[:,2], 'b', lw=lwh, label="40k")
 axes.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
 
@@ -87,7 +87,7 @@ axes = fig3.add_axes([0.15, 0.15, 0.7, 0.7]) #size of figure
 # axes.plot(mesh0.iloc[:,-6] , mesh0.iloc[:,1]/dc, 'k', lw=lwh, label="5k")
 # axes.plot(mesh2.iloc[:,-6] , mesh2.iloc[:,1]/dc, 'r', lw=lwh, label="12k")
 # axes.plot(mesh3.iloc[:,-6] , mesh3.iloc[:,1]/dc, 'g', lw=lwh, label="18k")
-axes.plot(mesh4.iloc[:,-6] , mesh4.iloc[:,1]/dc, 'b', lw=lwh, label="40k")
+axes.plot(mesh4.iloc[:,-3] , mesh4.iloc[:,0]/dc, 'b', lw=lwh, label="40k")
 
 
 axes.set_xlabel('$X[mm]$',fontsize=12)
@@ -97,32 +97,32 @@ axes.legend(loc=1) #
 
 fig3.savefig("shock_gv_rho.pdf")
 
-# fig 4
-fig4 = plt.figure( dpi=300)
-lwh = 2
-axes = fig4.add_axes([0.15, 0.15, 0.7, 0.7]) #size of figure
-# axes.plot(mesh0.iloc[:,-6] , mesh0.iloc[:,-3], 'k', lw=lwh, label="5k")
-# axes.plot(mesh2.iloc[:,-6] , mesh2.iloc[:,-3], 'r', lw=lwh, label="12k")
-# axes.plot(mesh3.iloc[:,-6] , mesh3.iloc[:,-3], 'g', lw=lwh, label="18k")
-axes.plot(mesh4.iloc[:,-6] , mesh4.iloc[:,-3], 'b', lw=lwh, label="40k")
+# # fig 4
+# fig4 = plt.figure( dpi=300)
+# lwh = 2
+# axes = fig4.add_axes([0.15, 0.15, 0.7, 0.7]) #size of figure
+# # axes.plot(mesh0.iloc[:,-6] , mesh0.iloc[:,-3], 'k', lw=lwh, label="5k")
+# # axes.plot(mesh2.iloc[:,-6] , mesh2.iloc[:,-3], 'r', lw=lwh, label="12k")
+# # axes.plot(mesh3.iloc[:,-6] , mesh3.iloc[:,-3], 'g', lw=lwh, label="18k")
+# axes.plot(mesh4.iloc[:,-6] , mesh4.iloc[:,-3], 'b', lw=lwh, label="40k")
 
-# sub_axes = plt.axes([0.55, 0.25, 0.25, 0.25]) 
-# x = []
-# plot the zoomed portion
-# for i in mesh4.iloc[:,-3].index:
-#     if (mesh4.iloc[i,-3])<0:
-#         x.append(i)
-# sub_axes.plot(mesh4.iloc[x[0]:x[-1],-6], mesh4.iloc[x[0]:x[-1],-3] , 'b') 
-# sub_axes.set_ylim([-0.007, -0.002])
-# sub_axes.set_xlim([0, 0.4])
-# sub_axes.yaxis.set_major_formatter(FormatStrFormatter('%.3f'))
+# # sub_axes = plt.axes([0.55, 0.25, 0.25, 0.25]) 
+# # x = []
+# # plot the zoomed portion
+# # for i in mesh4.iloc[:,-3].index:
+# #     if (mesh4.iloc[i,-3])<0:
+# #         x.append(i)
+# # sub_axes.plot(mesh4.iloc[x[0]:x[-1],-6], mesh4.iloc[x[0]:x[-1],-3] , 'b') 
+# # sub_axes.set_ylim([-0.007, -0.002])
+# # sub_axes.set_xlim([0, 0.4])
+# # sub_axes.yaxis.set_major_formatter(FormatStrFormatter('%.3f'))
 
-axes.set_xlabel('$X[mm]$',fontsize=12)
-axes.set_ylabel('$\\Gamma$',fontsize=12) 
-axes.set_title('$\\Gamma$ along y$=0.25 mm$',fontsize=14)
-axes.legend(loc=0) # 
+# axes.set_xlabel('$X[mm]$',fontsize=12)
+# axes.set_ylabel('$\\Gamma$',fontsize=12) 
+# axes.set_title('$\\Gamma$ along y$=0.25 mm$',fontsize=14)
+# axes.legend(loc=0) # 
 
-fig4.savefig("shock_gv_Gamma.pdf")
+# fig4.savefig("shock_gv_Gamma.pdf")
 
 # # fig 5
 # fig5 = plt.figure( dpi=300)
