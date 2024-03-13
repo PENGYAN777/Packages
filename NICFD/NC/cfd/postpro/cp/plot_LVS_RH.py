@@ -11,13 +11,19 @@ plot (P,v) diagram.
 # P = CP.CoolProp.PropsSI('P','T', T, 'Q', 1,  fluidname)
 
 import matplotlib
+import math
 import numpy as np
 import CoolProp as CP
 import matplotlib.pyplot as plt
 import scipy.interpolate
 import pandas as pd
+import time
 
-# give fluid name
+start = time.time()
+
+"""
+0. Fluid info and shock angle beta, delfction angle theta
+"""
 fluidname = "HEOS::MD4M"
 Pc = CP.CoolProp.PropsSI('Pcrit',fluidname)
 Tc = CP.CoolProp.PropsSI('Tcrit',fluidname)
@@ -32,11 +38,13 @@ print("molar mass:", MW)
 Rs = R/MW
 print("specific gas constant:", Rs)
 
+beta_cfd = math.atan(0.52/0.7) 
+beta_cfd = beta_cfd*180/math.pi
+theta = math.atan(0.2/0.7)
 
-
-# ----------------
-# Saturation curve
-# ---------------
+"""
+1. Saturation curve
+"""
 # liquid phase
 psl = np.linspace(Pc*0.5, Pc*1.0, 500)
 dsl = CP.CoolProp.PropsSI('Dmass','P',psl,'Q',0,fluidname)
@@ -47,41 +55,9 @@ dsv = CP.CoolProp.PropsSI('Dmass','P',psv,'Q',1,fluidname)
 vsv = 1/dsv
 
 
-
-# ----------------
-# isentropes
-# ---------------
-# s1
-v1 = vc*2.5
-p1 = Pc*1.05
-s1 = CP.CoolProp.PropsSI('Smass','P', p1, 'Dmass', 1/v1,  fluidname)
-
-v1 = np.linspace(vc*0.5, vc*4.5,500) # P<Pc
-v1 = pd.Series(v1)
-p1 = np.zeros(v1.size) 
-for i in v1.index:
-    p1[i] = CP.CoolProp.PropsSI('P','Smass', s1-190, 'Dmass', 1/v1[i],  fluidname)
-    
-
-# s2
-v2 = np.linspace(vc*0.5, vc*4.5,500) # P<Pc
-v2 = pd.Series(v2)
-p2 = np.zeros(v2.size) 
-for i in v1.index:
-    p2[i] = CP.CoolProp.PropsSI('P','Smass', s1-100, 'Dmass', 1/v2[i],  fluidname)
-    
-# s3
-v3 = np.linspace(vc*0.5, vc*4.5,500) # P<Pc
-v3 = pd.Series(v3)
-p3 = np.zeros(v3.size) 
-for i in v3.index:
-    p3[i] = CP.CoolProp.PropsSI('P','Smass', s1-175, 'Dmass', 1/v3[i],  fluidname)
-
-
-
-# ----------------
-# Gamma=0 curve
-# ---------------
+"""
+2. Gamma=0 curve
+"""
 # consider single capor phase only
 pg = np.linspace(Pc*0.7, Pc*1.0,100) #
 dg = CP.CoolProp.PropsSI('Dmass','P',pg,'Q',1,fluidname) 
@@ -104,47 +80,124 @@ for i in vg.index:
 pg0 = np.asarray(pg0) # convert list to array
 vg0 = np.asarray(vg0)
 
+"""
+3. Ranking Hugoniot curve
+"""
+"""
+3.1 pre-shock state
+"""
+P1 = Pc*0.99
+d1 = dc*0.80
+v1 = 1/d1
+# v1 = 1/d1
+c1 = CP.CoolProp.PropsSI('A','P', P1, 'Dmass', d1,  fluidname)
+h1 =  CP.CoolProp.PropsSI('Hmass','P', P1, 'Dmass', d1,  fluidname)
 
-        
+# """
+# 3.2 Ranking Hugoniot curve h(p,v)
+# """
+# n1 = 20
+# P2 = np.linspace(Pc*0.7, Pc*0.99 ,n1) # post-shock Mach
+# P2 = pd.Series(P2)
+# v2 = np.zeros(P2.size) 
+# for j in P2.index:
+#     P = P2[j]
+#     # initial guess pf v2
+#     n2 = 300
+#     v = np.linspace(vc*1.2,vc*4.0 ,n2) 
+#     v = pd.Series(v)
+#     diff = np.zeros(v.size) 
+#     for i in v.index:
+#         diff[i] = CP.CoolProp.PropsSI('Hmass','P', P, 'Dmass', 1/v[i], fluidname) - h1 - 0.5*(P-P1)*(v1+v[i])
+#     # print("min index:", np.argmin(abs(diff)), "min diff: ", diff[np.argmin(abs(diff))])
+#     v2[j] = v[np.argmin(abs(diff))]
+# """
+# 3.3 Rayleigh line
+# """
+# M1 = 1.7
+# u1 = M1*c1
+# v2r = np.zeros(P2.size) # v2 for Rayleigh line
+# for i in P2.index:
+#       P = P2[i]
+#       v2r[i] = v1-(P-P1)*v1*v1/u1/u1
+"""
+3.4 Post-shock state
+"""
 
+PP = Pc*0.84
+dP = dc*0.45
 
-# ----------------
-# Plot
-# ---------------
+"""
+3.5 isentrope
+"""
 
+s1 = CP.CoolProp.PropsSI('Smass','P', P1, 'Dmass', d1,  fluidname)
+s2 = CP.CoolProp.PropsSI('Smass','P', PP, 'Dmass', dP,  fluidname)
+ve1 = np.linspace(vc*1.01, vc*3,500) # P<Pc
+ve1 = pd.Series(ve1)
+pe1 = np.zeros(ve1.size) 
+pe2 = np.zeros(ve1.size) 
+for i in ve1.index:
+    pe1[i] = CP.CoolProp.PropsSI('P','Smass', s1, 'Dmass', 1/ve1[i],  fluidname)
+    pe2[i] = CP.CoolProp.PropsSI('P','Smass', s2, 'Dmass', 1/ve1[i],  fluidname)
 
-# fillcolor = 'g'
-
-# fig = plt.figure(figsize = (6,6))
-# ax = fig.add_subplot(111)
+"""
+x. plot
+"""
 fig1 = plt.figure( dpi=300)
 lwh = 2
 axes = fig1.add_axes([0.15, 0.15, 0.7, 0.7]) #size of figure
 lw = 2
-# LVS
+"""
+x.1 Liquid vapor saturation curve
+"""
 axes.plot(vsl/vc,psl/Pc,'k',lw = lw, label = "LVS")
 axes.plot(vsv/vc,psv/Pc,'k',lw = lw)
 
-# isentrope
-
-axes.plot(v1/vc,p1/Pc,'k--',lw = lw/2)
-axes.plot(v2/vc,p2/Pc,'k--',lw = lw/2)
-axes.plot(v3/vc,p3/Pc,'k--',lw = lw/2,label="isentropes")
-# Labels
-plt.text(2.8, 0.8, '$s=s_\\tau$',ha= 'center', size = 10)
-
-
-# criticla point
+"""
+x.2 critical point
+"""
 axes.plot(vc/vc,Pc/Pc,'ko',lw = lw , label = "Critical point")
 
-# Gamma  curve
-axes.plot(vg0/vc,pg0/Pc,'b',lw = lw, label = "$\Gamma=0$")
+"""
+x.3 Gamma = 0 curve
+"""
+axes.plot(vg0/vc,pg0/Pc,'g',lw = lw, label = "$\Gamma=0$")
 
+"""
+x.4 initial point of Ranking Hugonoit curve 
+"""
+axes.plot(1/d1/vc,P1/Pc,'bo',lw = lw/2, label = "Pre-shock")
 
-axes.set_ylim([0.5, 1.2])
-# axes.set_xlim([0.5, 4.0])
+"""
+x.5 Ranking Hugonoit curve 
+"""
+# axes.plot(v2/vc,P2/Pc,'b',lw = lw, label = "Ranking Hugoniot")
+
+"""
+x.6 Rayleigh line
+"""
+# axes.plot(v2r/vc,P2/Pc,'b--',lw = lw, label = "Rayleigh line")
+
+"""
+x.7 post-shock state
+"""
+axes.plot(1/dP/vc,PP/Pc,'b+',lw = lw/2, label = "Post-shock")
+
+"""
+x.8 isentrope
+"""
+axes.plot(ve1/vc,pe1/Pc,'k--',lw = lw/2,label="isentropes")
+axes.plot(ve1/vc,pe2/Pc,'k--',lw = lw/2)
+
+# axes.set_ylim([0.5, 1.2])
+axes.set_xlim([0.5, 5.0])
 axes.set_xlabel('$v/v_c$')
 axes.set_ylabel('$P/P_c$')
 plt.title('Pv diagram for siloxane MD$_4$M')
 axes.legend(loc=0) # 2 means left top
-fig1.savefig("LSV.pdf") 
+fig1.savefig("LSV_RHL.pdf") 
+
+
+end = time.time()
+print("computational time(s): ", end - start)

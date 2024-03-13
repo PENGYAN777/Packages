@@ -95,7 +95,7 @@ for j in P2.index:
     v2[j] = v[np.argmin(abs(diff))]
 # ----------------
 # Rayleigh line, use Eq. (2.4)
-M1 = 1.3
+M1 = 1.25
 u1 = M1*c1
 v2r = np.zeros(P2.size) # v2 for Rayleigh line
 for i in P2.index:
