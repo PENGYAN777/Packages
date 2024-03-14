@@ -38,8 +38,8 @@ print("molar mass:", MW)
 Rs = R/MW
 print("specific gas constant:", Rs)
 
-beta_cfd = math.atan(0.52/0.7) 
-beta_cfd = beta_cfd*180/math.pi
+beta_cfd = math.atan(0.52/0.7)  #rad
+# beta_cfd = beta_cfd*180/math.pi # degree
 theta = math.atan(0.2/0.7)
 
 """
@@ -93,33 +93,34 @@ v1 = 1/d1
 c1 = CP.CoolProp.PropsSI('A','P', P1, 'Dmass', d1,  fluidname)
 h1 =  CP.CoolProp.PropsSI('Hmass','P', P1, 'Dmass', d1,  fluidname)
 
-# """
-# 3.2 Ranking Hugoniot curve h(p,v)
-# """
-# n1 = 20
-# P2 = np.linspace(Pc*0.7, Pc*0.99 ,n1) # post-shock Mach
-# P2 = pd.Series(P2)
-# v2 = np.zeros(P2.size) 
-# for j in P2.index:
-#     P = P2[j]
-#     # initial guess pf v2
-#     n2 = 300
-#     v = np.linspace(vc*1.2,vc*4.0 ,n2) 
-#     v = pd.Series(v)
-#     diff = np.zeros(v.size) 
-#     for i in v.index:
-#         diff[i] = CP.CoolProp.PropsSI('Hmass','P', P, 'Dmass', 1/v[i], fluidname) - h1 - 0.5*(P-P1)*(v1+v[i])
-#     # print("min index:", np.argmin(abs(diff)), "min diff: ", diff[np.argmin(abs(diff))])
-#     v2[j] = v[np.argmin(abs(diff))]
-# """
-# 3.3 Rayleigh line
-# """
-# M1 = 1.7
-# u1 = M1*c1
-# v2r = np.zeros(P2.size) # v2 for Rayleigh line
-# for i in P2.index:
-#       P = P2[i]
-#       v2r[i] = v1-(P-P1)*v1*v1/u1/u1
+"""
+3.2 Ranking Hugoniot curve h(p,v)
+"""
+n1 = 20
+P2 = np.linspace(Pc*0.7, Pc*0.99 ,n1) # post-shock Mach
+P2 = pd.Series(P2)
+v2 = np.zeros(P2.size) 
+for j in P2.index:
+    P = P2[j]
+    # initial guess pf v2
+    n2 = 300
+    v = np.linspace(vc*1.2,vc*4.0 ,n2) 
+    v = pd.Series(v)
+    diff = np.zeros(v.size) 
+    for i in v.index:
+        diff[i] = CP.CoolProp.PropsSI('Hmass','P', P, 'Dmass', 1/v[i], fluidname) - h1 - 0.5*(P-P1)*(v1+v[i])
+    # print("min index:", np.argmin(abs(diff)), "min diff: ", diff[np.argmin(abs(diff))])
+    v2[j] = v[np.argmin(abs(diff))]
+"""
+3.3 Rayleigh line
+"""
+M1 = 1.7
+u1 = M1*c1
+u1n = u1*math.sin(beta_cfd)
+v2r = np.zeros(P2.size) # v2 for Rayleigh line
+for i in P2.index:
+      P = P2[i]
+      v2r[i] = v1-(P-P1)*v1*v1/u1n/u1n
 """
 3.4 Post-shock state
 """
@@ -133,12 +134,12 @@ dP = dc*0.45
 
 s1 = CP.CoolProp.PropsSI('Smass','P', P1, 'Dmass', d1,  fluidname)
 s2 = CP.CoolProp.PropsSI('Smass','P', PP, 'Dmass', dP,  fluidname)
-ve1 = np.linspace(vc*1.01, vc*3,500) # P<Pc
+ve1 = np.linspace(vc*1.5, vc*3,500) # P<Pc
 ve1 = pd.Series(ve1)
 pe1 = np.zeros(ve1.size) 
 pe2 = np.zeros(ve1.size) 
 for i in ve1.index:
-    pe1[i] = CP.CoolProp.PropsSI('P','Smass', s1, 'Dmass', 1/ve1[i],  fluidname)
+    pe1[i] = CP.CoolProp.PropsSI('P','Smass', s1+50, 'Dmass', 1/ve1[i],  fluidname)
     pe2[i] = CP.CoolProp.PropsSI('P','Smass', s2, 'Dmass', 1/ve1[i],  fluidname)
 
 """
@@ -157,7 +158,7 @@ axes.plot(vsv/vc,psv/Pc,'k',lw = lw)
 """
 x.2 critical point
 """
-axes.plot(vc/vc,Pc/Pc,'ko',lw = lw , label = "Critical point")
+# axes.plot(vc/vc,Pc/Pc,'ko',lw = lw , label = "Critical point")
 
 """
 x.3 Gamma = 0 curve
@@ -172,12 +173,12 @@ axes.plot(1/d1/vc,P1/Pc,'bo',lw = lw/2, label = "Pre-shock")
 """
 x.5 Ranking Hugonoit curve 
 """
-# axes.plot(v2/vc,P2/Pc,'b',lw = lw, label = "Ranking Hugoniot")
+axes.plot(v2/vc,P2/Pc,'b',lw = lw, label = "Ranking Hugoniot")
 
 """
 x.6 Rayleigh line
 """
-# axes.plot(v2r/vc,P2/Pc,'b--',lw = lw, label = "Rayleigh line")
+axes.plot(v2r/vc,P2/Pc,'b--',lw = lw, label = "Rayleigh line")
 
 """
 x.7 post-shock state
@@ -188,7 +189,7 @@ axes.plot(1/dP/vc,PP/Pc,'b+',lw = lw/2, label = "Post-shock")
 x.8 isentrope
 """
 axes.plot(ve1/vc,pe1/Pc,'k--',lw = lw/2,label="isentropes")
-axes.plot(ve1/vc,pe2/Pc,'k--',lw = lw/2)
+# axes.plot(ve1/vc,pe2/Pc,'k--',lw = lw/2)
 
 # axes.set_ylim([0.5, 1.2])
 axes.set_xlim([0.5, 5.0])
