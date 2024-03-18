@@ -60,37 +60,107 @@ GAMMA = pd.read_csv("GAMMA.csv", ",", skiprows=0)
 """
 2. Double sonic locus
 """
-"""
-2.1 Find M2 = 1 from Rayleigh line
-"""
+
+PAD = []
+VAD = []
+PBD = []
+VBD = []
+
 M1 = 1.0
-s1 = 515
-v1 = 1.35*vc
-d1 = 1/v1
-P1 = CP.CoolProp.PropsSI('P','Dmass',d1,'Smass',s1,fluidname) 
-c1 = CP.CoolProp.PropsSI('A','P', P1, 'Dmass', d1,  fluidname)
-h1 =  CP.CoolProp.PropsSI('Hmass','P', P1, 'Dmass', d1,  fluidname)
-u1 = c1*M1
-ht1 = h1 + 0.5*u1*u1
-# Rayleigh line
-n1 = 100
-P2r = np.linspace(P1*0.99, Pc*0.85 ,n1) # post-shock Mach
-P2r = pd.Series(P2r)
-v2r = np.zeros(P2r.size) 
-M2 = np.zeros(P2r.size) 
-for i in P2r.index:
-     P = P2r[i]
-     v2r[i] = (1-(P-P1)*v1/u1/u1)*v1
-     d2 = 1/v2r[i]
-     c2 = CP.CoolProp.PropsSI('A','P', P, 'Dmass', d2,  fluidname)
-     h2 =  CP.CoolProp.PropsSI('Hmass','P', P, 'Dmass', d2,  fluidname)
-     u2 = (ht1-h2)*2
-     u2 = math.sqrt(u2)
-     M2[i] = u2/c2 
-i = np.argmin(abs(M2-1.0)) 
-v2 = v2r[i]
-P2 = P2r[i]
-print("M1 > M2: ", M1,M2[i])
+
+s1 = np.linspace(507,520,5)
+s1 = pd.Series(s1)
+for k in s1.index:
+    n1 = 50
+    v1 = np.linspace(vc*1.2, vc*1.5 ,n1)
+    v1 = pd.Series(v1)
+    P1 = np.zeros(v1.size)
+    v2 = np.zeros(v1.size)
+    P2 = np.zeros(v1.size)
+    for j in v1.index:
+        d1 = 1/v1[j]
+        P1[j] = CP.CoolProp.PropsSI('P','Dmass',d1,'Smass',s1[k],fluidname) 
+        c1 = CP.CoolProp.PropsSI('A','P', P1[j], 'Dmass', d1,  fluidname)
+        h1 =  CP.CoolProp.PropsSI('Hmass','P', P1[j], 'Dmass', d1,  fluidname)
+        u1 = c1*M1
+        ht1 = h1 + 0.5*u1*u1
+        # Rayleigh line
+        n2 = 100
+        P2r = np.linspace(Pc*0.99, Pc*0.7 ,n2) # post-shock Mach
+        P2r = pd.Series(P2r)
+        v2r = np.zeros(P2r.size) 
+        diff = np.zeros(P2r.size) 
+        for i in P2r.index:
+             P = P2r[i]
+             v2r[i] = (1-(P-P1[j])*v1[j]/u1/u1)*v1[j]
+             d2 = 1/v2r[i]
+             ds = CP.CoolProp.PropsSI('Dmass','P', P, 'Q', 1,  fluidname)
+             if v2r[i]<1/ds:
+                 # print("two phase")
+                 continue
+             c2 = CP.CoolProp.PropsSI('A','P', P, 'Dmass', d2,  fluidname)
+             h2 =  CP.CoolProp.PropsSI('Hmass','P', P, 'Dmass', d2,  fluidname)
+             u2 = c2
+             diff[i] = abs(h2 + 0.5*u2*u2 - ht1)/ht1
+        i = np.argmin(diff)
+        if i>0:
+            print("k, j, i, diff: ", k, j, i , diff[i])
+            PAD.append(P1[j])
+            VAD.append(v1[j])
+            PBD.append(P2r[i])
+            VBD.append(v2r[i])
+            break
+    
+
+
+
+"""
+3. Post sonic shock originating from pre-shock state along saturation curve
+"""
+PL = []
+VL = []
+
+vmin = vc*1.2
+vmax = vc*2.26
+n3 = 5
+v1 = np.linspace(vmin, vmax ,n3)
+v1 = pd.Series(v1)
+P1 = np.zeros(v1.size)
+for j in v1.index:
+    print("j: ", j)
+    M1 = 1.001
+    d1 = 1/v1[j]
+    P1[j] = CP.CoolProp.PropsSI('P','Dmass', d1, 'Q', 1,  fluidname)
+    c1 = CP.CoolProp.PropsSI('A','P', P1[j], 'Q', 1,  fluidname)
+    h1 =  CP.CoolProp.PropsSI('Hmass','P', P1[j], 'Dmass', d1,  fluidname)
+    u1 = c1*M1
+    ht1 = h1 + 0.5*u1*u1
+    # Rayleigh line
+    n4 = 100
+    P2r = np.linspace(Pc*0.8, Pc*0.75 ,n4) # post-shock Mach
+    P2r = pd.Series(P2r)
+    v2r = np.zeros(P2r.size) 
+    diff = np.zeros(P2r.size) 
+    for i in P2r.index:
+        diff[i] = 100
+        P = P2r[i]
+        v2r[i] = (1-(P-P1[j])*v1[j]/u1/u1)*v1[j]
+        d2 = 1/v2r[i]
+        ds = CP.CoolProp.PropsSI('Dmass','P', P, 'Q', 1,  fluidname)
+        if v2r[i]<1/ds:
+            # print("two phase")
+            continue
+        T2 = CP.CoolProp.PropsSI('T','P', P, 'Dmass', d2,  fluidname)
+        c2 = CP.CoolProp.PropsSI('A','P|gas', P, 'T', T2,  fluidname)
+        h2 =  CP.CoolProp.PropsSI('Hmass','P', P, 'Dmass', d2,  fluidname)
+        u2 = c2
+        diff[i] = abs(h2 + 0.5*u2*u2 - ht1)/ht1
+    i = np.argmin(diff)
+    if i>0:
+        print("LVS i, diff: ",   i , diff[i])
+        PL.append(P2r[i])
+        VL.append(v2r[i])
+    
 
 
 
@@ -105,24 +175,37 @@ lw = 2
 """
 X.1 Saturation curve
 """
-axes.plot(LSV.iloc[:,2],LSV.iloc[:,3],'k',lw = lw, label = "LVS")
+axes.plot(LSV.iloc[:,2],LSV.iloc[:,3],'b',lw = lw, label = "LVS")
 
 
 """
 X.2 Gamma = 0
 """
-axes.plot(GAMMA.iloc[:,2],GAMMA.iloc[:,3],'b',lw = lw, label = "$\Gamma=0$")
+axes.plot(GAMMA.iloc[:,2],GAMMA.iloc[:,3],'k--',lw = lw, label = "$\Gamma=0$")
 
 """
 X.3 Isentropy
 """
-axes.plot(v1/vc,P1/Pc,'k--',lw = lw/2, label = "s")
+# axes.plot(v1/vc,P1/Pc,'k--',lw = lw/2, label = "s")
 
 """
-X.4 Rayleigh line
+X.4 Double sonic locus
 """
-axes.plot(v1/vc,P1/Pc,'bo',lw = lw, label = "Pre")
-axes.plot(v2/vc,P2/Pc,'b+',lw = lw, label = "Post")
+PAD = np.array(PAD)
+VAD = np.array(VAD)
+PBD = np.array(PBD)
+VBD = np.array(VBD)
+
+axes.plot(VAD/vc,PAD/Pc,'k',lw = lw, label = "DSL")
+axes.plot(VBD/vc,PBD/Pc,'k',lw = lw)
+
+"""
+X.5 Last portion
+"""
+PL = np.array(PL)
+VL = np.array(VL)
+axes.plot(VL/vc,PL/Pc,'k+',lw = lw)
+
 
 # DSL
 # axes.plot(vd/vc,Pd/Pc,'ro',lw = lw/2, label = "DSL")
