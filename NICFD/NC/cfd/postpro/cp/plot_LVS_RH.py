@@ -86,20 +86,27 @@ vg0 = np.asarray(vg0)
 """
 3.1 pre-shock state
 """
+
 P1 = Pc*0.99
 d1 = dc*0.80
 v1 = 1/d1
 # v1 = 1/d1
 c1 = CP.CoolProp.PropsSI('A','P', P1, 'Dmass', d1,  fluidname)
 h1 =  CP.CoolProp.PropsSI('Hmass','P', P1, 'Dmass', d1,  fluidname)
-
+M1 = 1.7
+u1 = M1*c1
+ht1 = h1 + 0.5*u1*u1 
 """
 3.2 Ranking Hugoniot curve h(p,v)
 """
-n1 = 20
+n1 = 30
 P2 = np.linspace(Pc*0.7, Pc*0.99 ,n1) # post-shock Mach
 P2 = pd.Series(P2)
 v2 = np.zeros(P2.size) 
+M2 = np.zeros(P2.size) 
+c2 = np.zeros(P2.size) 
+u2 = np.zeros(P2.size) 
+h2 = np.zeros(P2.size) 
 for j in P2.index:
     P = P2[j]
     # initial guess pf v2
@@ -111,12 +118,17 @@ for j in P2.index:
         diff[i] = CP.CoolProp.PropsSI('Hmass','P', P, 'Dmass', 1/v[i], fluidname) - h1 - 0.5*(P-P1)*(v1+v[i])
     # print("min index:", np.argmin(abs(diff)), "min diff: ", diff[np.argmin(abs(diff))])
     v2[j] = v[np.argmin(abs(diff))]
+    d2 = 1/v2[j]
+    c2[j] = CP.CoolProp.PropsSI('A','P', P, 'Dmass', d2,  fluidname)
+    h2[j] = CP.CoolProp.PropsSI('Hmass','P', P, 'Dmass', d2,  fluidname)
+    u2[j] = math.sqrt(2*(ht1 - h2[j]))
+    M2[j] = u2[j]/c2[j]
 """
 3.3 Rayleigh line
 """
-M1 = 1.7
-u1 = M1*c1
+
 u1n = u1*math.sin(beta_cfd)
+u1t = u1*math.cos(beta_cfd)
 v2r = np.zeros(P2.size) # v2 for Rayleigh line
 for i in P2.index:
       P = P2[i]
@@ -126,7 +138,12 @@ for i in P2.index:
 """
 
 PP = Pc*0.84
-dP = dc*0.45
+dP = dc*0.452
+cP = CP.CoolProp.PropsSI('A','P', PP, 'Dmass', dP,  fluidname)
+hP = CP.CoolProp.PropsSI('Hmass','P', PP, 'Dmass', dP,  fluidname)
+uP = math.sqrt(2*(ht1 -hP))
+MP = uP/cP
+print("M2: ", MP)
 
 """
 3.5 isentrope
