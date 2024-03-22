@@ -24,16 +24,17 @@ MW = CP.CoolProp.PropsSI('M',fluidname)
 # print("molar mass:", MW)
 Rs = R/MW
 
-p = 735120
-t = 640.56
-d = 114.43
+p = 0.922*Pc
+t = 0.9836*Tc
+d = 0.4928*dc
 # heat capaticty gamma cp/cv
-g = 1.02
+g = 1.01
 
 a = 27*Rs*Rs*Tc*Tc/64/Pc
 b = 1/8*Rs*Tc/Pc
 # cv for PIG
-cv = CP.CoolProp.PropsSI('CVMASS','T', t, 'P',p*0.1,  fluidname) 
+# cv = CP.CoolProp.PropsSI('CVMASS','T', t, 'P',p*0.1,  fluidname) 
+cv = Rs/(g-1)
 Z = CP.CoolProp.PropsSI('Z','T', t, 'P',p*0.1,  fluidname) 
 N = 2*cv/Rs
 # N = 120
@@ -45,10 +46,11 @@ t0 = t*0.5
 c = (1+2/N)*Rs*t*(v/(v-b))**2-2*a/v
 s = Rs*np.log((v-b)/(v0-b)) + (Rs)/(g-1)*np.log(t/t0)
 
-v1 = 0.52*v
+# new density with same entropy
+v1 = 1.18*v0
 d1 = 1/v1
 # find t1 = t1(s,v1)
-t2 = np.linspace(t*0.9,t*1.1,1000) 
+t2 = np.linspace(t*0.9,t*1.1,500) 
 t2 = pd.Series(t2)
 s1 = np.zeros(t2.size) 
 for i in t2.index:

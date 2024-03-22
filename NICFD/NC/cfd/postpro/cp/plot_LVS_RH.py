@@ -38,7 +38,7 @@ print("molar mass:", MW)
 Rs = R/MW
 print("specific gas constant:", Rs)
 
-beta_cfd = math.atan(0.52/0.7)  #rad
+beta_cfd = math.atan((0.72-0.2)/0.7)
 # beta_cfd = beta_cfd*180/math.pi # degree
 theta = math.atan(0.2/0.7)
 
@@ -137,8 +137,8 @@ for i in P2.index:
 3.4 Post-shock state
 """
 
-PP = Pc*0.84
-dP = dc*0.452
+PP = Pc*0.887
+dP = dc*0.522
 cP = CP.CoolProp.PropsSI('A','P', PP, 'Dmass', dP,  fluidname)
 hP = CP.CoolProp.PropsSI('Hmass','P', PP, 'Dmass', dP,  fluidname)
 uP = math.sqrt(2*(ht1 -hP))

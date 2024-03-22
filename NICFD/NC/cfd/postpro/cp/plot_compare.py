@@ -31,11 +31,12 @@ Pc = CP.CoolProp.PropsSI('Pcrit',fluidname)
 Tc = CP.CoolProp.PropsSI('Tcrit',fluidname)
 dc = CP.CoolProp.PropsSI('rhocrit',fluidname)
 
-mesh0 = pd.read_csv("m0new.csv", ",", skiprows=0)
-# mesh1 = pd.read_csv("m1new.csv", ",", skiprows=0)
-mesh2 = pd.read_csv("m2new.csv", ",", skiprows=0)
+
+
 mesh3 = pd.read_csv("m3new.csv", ",", skiprows=0)
 mesh4 = pd.read_csv("m4new.csv", ",", skiprows=0)
+mesh5 = pd.read_csv("m5new.csv", ",", skiprows=0)
+mesh6 = pd.read_csv("m6new.csv", ",", skiprows=0)
 
 
 
@@ -43,10 +44,10 @@ mesh4 = pd.read_csv("m4new.csv", ",", skiprows=0)
 fig1 = plt.figure( dpi=300)
 lwh = 2
 axes = fig1.add_axes([0.15, 0.15, 0.7, 0.7]) #size of figure
-axes.plot(mesh0.iloc[:,-6] , mesh0.iloc[:,7]/Pc, 'k', lw=lwh, label="5k")
-axes.plot(mesh2.iloc[:,-6] , mesh2.iloc[:,7]/Pc, 'r', lw=lwh, label="14k")
-axes.plot(mesh3.iloc[:,-6] , mesh3.iloc[:,7]/Pc, 'g', lw=lwh, label="23k")
-axes.plot(mesh4.iloc[:,-6] , mesh4.iloc[:,7]/Pc, 'b', lw=lwh, label="41k")
+axes.plot(mesh3.iloc[:,-6] , mesh3.iloc[:,7]/Pc, 'k', lw=lwh, label="22k")
+axes.plot(mesh4.iloc[:,-6] , mesh4.iloc[:,7]/Pc, 'r', lw=lwh, label="40k")
+axes.plot(mesh5.iloc[:,-6] , mesh5.iloc[:,7]/Pc, 'g', lw=lwh, label="74k")
+axes.plot(mesh6.iloc[:,-6] , mesh6.iloc[:,7]/Pc, 'b', lw=lwh, label="140k")
 axes.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 # sub_axes = plt.axes([0.26, 0.26, 0.25, 0.25]) 
 
@@ -66,10 +67,11 @@ fig1.savefig("shock_gv_p.pdf")
 fig2 = plt.figure( dpi=300)
 lwh = 2
 axes = fig2.add_axes([0.15, 0.15, 0.7, 0.7]) #size of figure
-axes.plot(mesh0.iloc[:,-6] , mesh0.iloc[:,3], 'k', lw=lwh, label="5k")
-axes.plot(mesh2.iloc[:,-6] , mesh2.iloc[:,3], 'r', lw=lwh, label="14k")
-axes.plot(mesh3.iloc[:,-6] , mesh3.iloc[:,3], 'g', lw=lwh, label="23k")
-axes.plot(mesh4.iloc[:,-6] , mesh4.iloc[:,3], 'b', lw=lwh, label="41k")
+axes.plot(mesh3.iloc[:,-6] , mesh3.iloc[:,3], 'k', lw=lwh, label="22k")
+axes.plot(mesh4.iloc[:,-6] , mesh4.iloc[:,3], 'r', lw=lwh, label="40k")
+axes.plot(mesh5.iloc[:,-6] , mesh5.iloc[:,3], 'g', lw=lwh, label="74k")
+axes.plot(mesh6.iloc[:,-6] , mesh6.iloc[:,3], 'b', lw=lwh, label="140k")
+axes.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 axes.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
 
@@ -84,10 +86,11 @@ fig2.savefig("shock_gv_m.pdf")
 fig3 = plt.figure( dpi=300)
 lwh = 2
 axes = fig3.add_axes([0.15, 0.15, 0.7, 0.7]) #size of figure
-axes.plot(mesh0.iloc[:,-6] , mesh0.iloc[:,1]/dc, 'k', lw=lwh, label="5k")
-axes.plot(mesh2.iloc[:,-6] , mesh2.iloc[:,1]/dc, 'r', lw=lwh, label="14k")
-axes.plot(mesh3.iloc[:,-6] , mesh3.iloc[:,1]/dc, 'g', lw=lwh, label="23k")
-axes.plot(mesh4.iloc[:,-6] , mesh4.iloc[:,1]/dc, 'b', lw=lwh, label="41k")
+axes.plot(mesh3.iloc[:,-6] , mesh3.iloc[:,1]/dc, 'k', lw=lwh, label="22k")
+axes.plot(mesh4.iloc[:,-6] , mesh4.iloc[:,1]/dc, 'r', lw=lwh, label="40k")
+axes.plot(mesh5.iloc[:,-6] , mesh5.iloc[:,1]/dc, 'g', lw=lwh, label="74k")
+axes.plot(mesh6.iloc[:,-6] , mesh6.iloc[:,1]/dc, 'b', lw=lwh, label="140k")
+axes.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
 
 axes.set_xlabel('$X[mm]$',fontsize=12)
@@ -101,10 +104,11 @@ fig3.savefig("shock_gv_rho.pdf")
 fig4 = plt.figure( dpi=300)
 lwh = 2
 axes = fig4.add_axes([0.15, 0.15, 0.7, 0.7]) #size of figure
-axes.plot(mesh0.iloc[:,-6] , mesh0.iloc[:,-3], 'k', lw=lwh, label="5k")
-axes.plot(mesh2.iloc[:,-6] , mesh2.iloc[:,-3], 'r', lw=lwh, label="14k")
-axes.plot(mesh3.iloc[:,-6] , mesh3.iloc[:,-3], 'g', lw=lwh, label="23k")
-axes.plot(mesh4.iloc[:,-6] , mesh4.iloc[:,-3], 'b', lw=lwh, label="41k")
+axes.plot(mesh3.iloc[:,-6] , mesh3.iloc[:,-3], 'k', lw=lwh, label="22k")
+axes.plot(mesh4.iloc[:,-6] , mesh4.iloc[:,-3], 'r', lw=lwh, label="40k")
+axes.plot(mesh5.iloc[:,-6] , mesh5.iloc[:,-3], 'g', lw=lwh, label="74k")
+axes.plot(mesh6.iloc[:,-6] , mesh6.iloc[:,-3], 'b', lw=lwh, label="140k")
+axes.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
 # sub_axes = plt.axes([0.55, 0.25, 0.25, 0.25]) 
 # x = []

@@ -10,9 +10,8 @@ For compression shock, the algorithm is slightly different, plot the geometry an
 """
 import math
 
-beta_cfd = math.atan(0.52/0.7) 
-beta_cfd = beta_cfd*180/math.pi
-print("Shock angle (degree) from CFD: ", beta_cfd)
+beta_cfd = math.atan((0.72-0.2)/0.7)
+print("Shock angle (degree) from CFD: ", beta_cfd*180/math.pi)
 
 from scipy.optimize import fsolve
 import numpy as np
@@ -25,7 +24,7 @@ import CoolProp as CP
 0. FLuid property
 """
 # print("--------------------Fluid info ------------------")
-fluidname = "MD4M"
+fluidname = "HEOS::MD4M"
 print("Fluid name:", fluidname)
 R = CP.CoolProp.PropsSI("gas_constant",fluidname)
 W = CP.CoolProp.PropsSI("molar_mass",fluidname)
@@ -51,7 +50,7 @@ M1 = 1.7
 u1 = M1*c1 
 ht1 = h1 + 0.5*u1*u1
 print("pre-shock ocnditions: P1,T1,D1,M1 ",P1,T1,d1,M1 )
-theta = math.atan(0.2/0.7)
+theta = math.atan(0.15/0.7)
 print("deflection angle ", theta*180/math.pi)
 """
 2. post-shock states
@@ -84,6 +83,31 @@ M2 = u2/c2
 beta_theory = beta[i]
 print("post-shock ocnditions: P2,T2,D2,M2 ",P2,T2,d2,M2 )
 print("Shock angle (degree) from theory: ", beta_theory*180/math.pi)
+
+
+"""
+3. spped of shock
+"""
+u1n = u1*math.sin(beta_theory)
+u2n = u2*math.sin(beta_theory+theta)
+e1 = CP.CoolProp.PropsSI('Umass','P',P1,'Dmass',d1,fluidname) 
+et1 = e1 + 0.5*u1*u1
+Et1 = d1*et1
+e2 = CP.CoolProp.PropsSI('Umass','P',P2,'Dmass',d2,fluidname) 
+et2 = e2 + 0.5*u2*u2
+Et2 = d2*et2
+
+
+w1 = [d1, d1*u1n, Et1]
+f1 = [d1*u1n, d1*u1n*u1n+P1, u1n*(Et1+P1) ]
+w2 = [d2, d2*u2n, Et2]
+f2 = [d2*u2n, d2*u2n*u2n+P2, u2n*(Et2+P2)  ]
+
+w1 = np.array(w1)
+f1 = np.array(f1)
+w2 = np.array(w2)
+f2 = np.array(f2)
+ss = (f2-f1)/(w2-w1)
 
 
 

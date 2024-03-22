@@ -108,7 +108,6 @@ X. plot
 """
 
 fig1 = plt.figure( dpi=300)
-lwh = 2
 axes = fig1.add_axes([0.15, 0.15, 0.7, 0.7]) #size of figure
 lw = 2
 """
@@ -139,7 +138,8 @@ X.5 Last portion
 """
 P = np.array(P)
 v = np.array(v)
-axes.plot(v/vc, P/Pc, 'k--',lw = lw, label = "PSV")
+# axes.plot(v/vc, P/Pc, 'k--',lw = lw, label = "PSV")
+axes.plot(v/vc, P/Pc, 'k',lw = lw)
 
 """
 X.6 pre and post shock condition
@@ -149,8 +149,8 @@ d1 = 0.80*dc
 v1 = 1/d1
 axes.plot(v1/vc, P1/Pc, 'k+',lw = lw, label = "Pre")
 
-P2 = 0.84*Pc
-d2 = 0.45*dc
+P2 = 0.887*Pc
+d2 = 0.522*dc
 v2 = 1/d2
 axes.plot(v2/vc, P2/Pc, 'k*',lw = lw, label = "Post")
 

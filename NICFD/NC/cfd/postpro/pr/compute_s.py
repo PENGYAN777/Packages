@@ -11,7 +11,7 @@ import CoolProp as CP
 import pandas as pd
 
 fluidname = "PR::MD4M"
-data = pd.read_csv("m4.csv", ",")
+data = pd.read_csv("m6.csv", ",")
 P = data.iloc[:,6] 
 T = data.iloc[:,8] 
 D = data.iloc[:,0] 
@@ -37,4 +37,4 @@ shG =pd.DataFrame({'G':G, 'Z':Z, 's':s,})
 newData = pd.concat([data, shG], join = 'outer', axis = 1)
 # save newData in csv file
 # newData.to_csv("m4sh.csv")
-newData.to_csv("m4new.csv")
+newData.to_csv("m6new.csv")
