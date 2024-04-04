@@ -18,6 +18,10 @@ import scipy.interpolate
 import pandas as pd
 import math
 import time
+import os
+from IPython import get_ipython;   
+get_ipython().magic('reset -sf')
+os.system('clear')
 
 start = time.time()
 
