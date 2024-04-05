@@ -1,19 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Apr  4 14:40:08 2024
+Created on Fri Apr  5 18:39:21 2024
 
-Bisection method
+bisection method
 
-@author: yan
+@author: user
 """
-import matplotlib
-import numpy as np
-import CoolProp as CP
-import matplotlib.pyplot as plt
-import scipy.interpolate
-import pandas as pd
-import math
 import time
 import os
 from IPython import get_ipython;   
@@ -22,45 +15,56 @@ os.system('clear')
 
 start = time.time()
 
+def bisection_method(f, a, b, tol=1e-6, max_iterations=1000):
+    """
+    Bisection method to find a root of the function f(x) in the interval [a, b].
 
-"""
-0. function
-"""
-def f(x):
-    return  x**4-x-2
+    Parameters:
+        f: Callable function representing the equation to find the root of.
+        a: Lower bound of the interval.
+        b: Upper bound of the interval.
+        tol: Tolerance level for the root (default is 1e-6).
+        max_iterations: Maximum number of iterations allowed (default is 1000).
 
-"""
-1. initial guess a and b
-"""
-a = 1
-b = 2
-print("f(a)*f(b)<0: ", f(a)*f(b))
+    Returns:
+        root: Approximate root of the function within the specified tolerance.
+        iterations: Number of iterations taken to find the root.
+    """
+    if f(a) * f(b) >= 0:
+        raise ValueError("The function values at the endpoints must have opposite signs.")
 
-tol = 1e-4 # torelance
-nmax = 100 # number of iteration
-
-n = 1
-
-"""
-2. while iteration
-"""
-while n<nmax:
-    c = (a+b)/2
-    if f(c) == 0 or (b-a)/2<tol:
-        print("solution found")
-        print("c = ", c, "f(c) = ", f(c))
-        break
-    else:
-        n = n + 1
-        if f(a)*f(c)>=0:
-            a = c
+    iteration = 0
+    while iteration < max_iterations:
+        c = (a + b) / 2  # Calculate midpoint
+        if abs(f(c)) < tol:
+            return c, iteration  # Root found within tolerance
+        elif f(a) * f(c) < 0:
+            b = c  # Update upper bound
         else:
-            b = c
-print(" n = ", n)
+            a = c  # Update lower bound
+        iteration += 1
+
+    raise ValueError("Bisection method did not converge within the maximum number of iterations.")
 
 
+# Example usage:
+if __name__ == "__main__":
+    import math
 
+    # Define the function for which we want to find the root
+    def func(x):
+        return x**3 - 2*x - 5
 
+    # Initial interval
+    a = 1
+    b = 3
+
+    # Find the root using the bisection method
+    root, iterations = bisection_method(func, a, b)
+
+    # Print the result
+    print("Approximate root:", root)
+    print("Number of iterations:", iterations)
 
 end = time.time()
 print("computational time(s): ", end - start)

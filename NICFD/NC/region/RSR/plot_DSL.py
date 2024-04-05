@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import scipy.interpolate
 import pandas as pd
 import math
+from newton import f, fp, module
 import time
 import os
 from IPython import get_ipython;   
@@ -72,48 +73,64 @@ VBD = []
 
 M1 = 1.0
 
-s1 = np.linspace(507,520,5)
+s1 = np.linspace(515,516,1)
 s1 = pd.Series(s1)
 for k in s1.index:
-    n1 = 50
+    n1 = 1
     v1 = np.linspace(vc*1.2, vc*1.5 ,n1)
     v1 = pd.Series(v1)
     P1 = np.zeros(v1.size)
-    v2 = np.zeros(v1.size)
-    P2 = np.zeros(v1.size)
     for j in v1.index:
         d1 = 1/v1[j]
         P1[j] = CP.CoolProp.PropsSI('P','Dmass',d1,'Smass',s1[k],fluidname) 
         c1 = CP.CoolProp.PropsSI('A','P', P1[j], 'Dmass', d1,  fluidname)
-        h1 =  CP.CoolProp.PropsSI('Hmass','P', P1[j], 'Dmass', d1,  fluidname)
         u1 = c1*M1
-        ht1 = h1 + 0.5*u1*u1
-        # Rayleigh line
-        n2 = 100
-        P2r = np.linspace(Pc*0.99, Pc*0.7 ,n2) # post-shock Mach
-        P2r = pd.Series(P2r)
-        v2r = np.zeros(P2r.size) 
-        diff = np.zeros(P2r.size) 
-        for i in P2r.index:
-             P = P2r[i]
-             v2r[i] = (1-(P-P1[j])*v1[j]/u1/u1)*v1[j]
-             d2 = 1/v2r[i]
-             ds = CP.CoolProp.PropsSI('Dmass','P', P, 'Q', 1,  fluidname)
-             if v2r[i]<1/ds:
-                 # print("two phase")
-                 continue
-             c2 = CP.CoolProp.PropsSI('A','P', P, 'Dmass', d2,  fluidname)
-             h2 =  CP.CoolProp.PropsSI('Hmass','P', P, 'Dmass', d2,  fluidname)
-             u2 = c2
-             diff[i] = abs(h2 + 0.5*u2*u2 - ht1)/ht1
-        i = np.argmin(diff)
-        if i>0:
-            print("k, j, i, diff: ", k, j, i , diff[i])
-            PAD.append(P1[j])
-            VAD.append(v1[j])
-            PBD.append(P2r[i])
-            VBD.append(v2r[i])
-            break
+        """
+        2.1 initial guess for newton method
+        """
+        tol = 1e-3 # torelance
+        nmax = 50 # number of iteration
+        x = np.zeros( (3,nmax) )
+        x0 = (1/vc/2.5, u1/2, Pc*0.7) 
+        x[0,0] = x0[0]
+        x[1,0] = x0[1]
+        x[2,0] = x0[2]
+        n = 1
+        """
+        2.2 while iteration for newton method
+        """
+        while n<nmax-1:
+            a = f(1/v1[j], u1, P1[j], x[0,n-1], x[1,n-1], x[2,n-1])
+            b = fp(1/v1[j], u1, P1[j], x[0,n-1], x[1,n-1], x[2,n-1])
+            dx = - np.matmul(np.linalg.inv(b), a)
+            x[0,n] = x[0, n-1] + dx[0]
+            x[1,n] = x[1, n-1] + dx[1]
+            x[2,n] = x[2, n-1] + dx[2]
+            diff = abs( (module(x[0,n],x[1,n],x[2,n]) - module(x[0,n-1],x[1,n-1],x[2,n-1]) ) 
+                       / module(x[0,n-1],x[1,n-1],x[2,n-1]) )
+            if diff<tol:
+                # print("x1,x2,x3,f(x)", x[0,n], x[1,n],x[2,n], f(1/v1[j], u1, P1[j], x[0,n], x[1,n], x[2,n]) )
+                break
+            else:
+                n = n + 1
+        """
+        2.3 check M2=1?
+        """
+        d2 = x[0,n-1]
+        u2 = x[1,n-1]
+        P2 = x[2,n-1]
+        c2 = CP.CoolProp.PropsSI('A','P', P2, 'Dmass', d2,  fluidname)
+        M2 = u2/c2
+        # if abs(M2-1.0)<1e-3:
+        print(" n = ", n, "diff = ", diff, "M2 = ", M2)
+        PAD.append(P1[j])
+        VAD.append(v1[j])
+        PBD.append(P2)
+        VBD.append(1/d2)
+        break
+        
+        
+
     
 
 """
@@ -148,8 +165,8 @@ VAD = np.array(VAD)
 PBD = np.array(PBD)
 VBD = np.array(VBD)
 
-axes.plot(VAD/vc,PAD/Pc,'k',lw = lw, label = "DSL")
-axes.plot(VBD/vc,PBD/Pc,'k',lw = lw)
+axes.plot(VAD/vc,PAD/Pc,'ko',lw = lw, label = "pre")
+axes.plot(VBD/vc,PBD/Pc,'k+',lw = lw,label = "post")
 
 
 # DSL
