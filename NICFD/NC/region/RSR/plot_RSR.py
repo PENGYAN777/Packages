@@ -88,18 +88,19 @@ for j in v1.index:
     P2 = np.linspace(Pc*0.7, P1*0.95 ,n2) # post-shock Mach
     P2 = pd.Series(P2)
     v2r = np.zeros(P2.size) # v2 for Rayleigh line
-    M2 = np.zeros(P2.size) 
+    # M2 = np.zeros(P2.size) 
     for i in P2.index:
          v2r[i] = (1-(P2[i]-P1)*v1[j]/u1/u1)*v1[j]
          d2 = 1/v2r[i]
          h2 = CP.CoolProp.PropsSI('Hmass','P', P2[i], 'Dmass', d2,  fluidname)
          c2 = CP.CoolProp.PropsSI('A','P', P2[i], 'Dmass', d2,  fluidname)
+         G2 = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics', 'P',P2[i],'Dmass', d2,fluidname)
          u2 = math.sqrt(2*abs(ht1-h2))
-         M2[i] = u2/c2
-    i = np.argmin(abs(M2-1.0)) 
-    print("i, M2", i,M2[i])
-    P.append(P2[i])
-    v.append(v2r[i])
+         M2 = u2/c2
+         if abs(M2-1.0)<1e-3 and G2>0:
+             # print("i, M2", i,M2)
+             P.append(P2[i])
+             v.append(v2r[i])
 
 P.append(GAMMA.iloc[0,3]*Pc)
 v.append(GAMMA.iloc[0,2]*vc)
@@ -113,7 +114,7 @@ X. plot
 
 fig1 = plt.figure( dpi=300)
 axes = fig1.add_axes([0.15, 0.15, 0.7, 0.7]) #size of figure
-lw = 2
+lw = 2.5
 """
 X.1 Saturation curve
 """

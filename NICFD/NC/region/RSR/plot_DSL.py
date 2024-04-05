@@ -72,7 +72,7 @@ PBD = []
 VBD = []
 
 M1 = 1.0
-
+count = 0
 s1 = np.linspace(506.5,520,11)
 s1 = pd.Series(s1)
 for k in s1.index:
@@ -115,13 +115,14 @@ for k in s1.index:
         M2 = u2/c2
         G2 = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics', 'P',P2,'Dmass', d2,fluidname)
         if abs(M2-1.0)<1e-3 and G2>0:
+            count = count + 1
             PAD.append(P1[j])
             VAD.append(v1[j])
             PBD.append(P2)
             VBD.append(1/d2)
             print("diff = ", f[i], "M2 = ", M2)
     
-        
+print("count = ", count)     
         
         
 
