@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import scipy.interpolate
 import pandas as pd
 import math
-from newton import f, fp, module
+from bisection import bisection_method
 import time
 import os
 from IPython import get_ipython;   
@@ -73,61 +73,55 @@ VBD = []
 
 M1 = 1.0
 
-s1 = np.linspace(515,516,1)
+s1 = np.linspace(506.5,520,11)
 s1 = pd.Series(s1)
 for k in s1.index:
-    n1 = 1
+    n1 = 50
     v1 = np.linspace(vc*1.2, vc*1.5 ,n1)
     v1 = pd.Series(v1)
     P1 = np.zeros(v1.size)
     for j in v1.index:
         d1 = 1/v1[j]
         P1[j] = CP.CoolProp.PropsSI('P','Dmass',d1,'Smass',s1[k],fluidname) 
+        G1 = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics', 'P',P1[j],'Dmass', d1,fluidname)
         c1 = CP.CoolProp.PropsSI('A','P', P1[j], 'Dmass', d1,  fluidname)
         u1 = c1*M1
         """
-        2.1 initial guess for newton method
+        2.1 define function since f is alwasy positive, so can not use bisection method
         """
-        tol = 1e-3 # torelance
-        nmax = 50 # number of iteration
-        x = np.zeros( (3,nmax) )
-        x0 = (1/vc/2.5, u1/2, Pc*0.7) 
-        x[0,0] = x0[0]
-        x[1,0] = x0[1]
-        x[2,0] = x0[2]
-        n = 1
+        def ns(d2,d1,u1,p1):
+            h1 = CP.CoolProp.PropsSI('Hmass','P', p1, 'Dmass', d1,  fluidname)
+            ht1 = h1 + 0.5*u1*u1
+            u2 = d1*u1/d2
+            p2 = d1*u1*u1 + p1 - d2*u2*u2
+            h2 = CP.CoolProp.PropsSI('Hmass','P', p2, 'Dmass', d2,  fluidname)
+            ht2 = h2 + 0.5*u2*u2 
+            return (ht1 - ht2)/ht1
+        # a = d1/1.1
+        # b = d1/5
+        # root, iterations = bisection_method(ns, d1,u1,P1[j], a, b)
+        # print("Approximate root:", root)
+        # print("Number of iterations:", iterations)
+        D2 = np.linspace(d1/1.1, d1/5 ,50)
+        f = ns(D2, d1, u1, P1[j])
+        i = np.argmin(abs(f)) 
         """
-        2.2 while iteration for newton method
+        2.2 check M2=1?
         """
-        while n<nmax-1:
-            a = f(1/v1[j], u1, P1[j], x[0,n-1], x[1,n-1], x[2,n-1])
-            b = fp(1/v1[j], u1, P1[j], x[0,n-1], x[1,n-1], x[2,n-1])
-            dx = - np.matmul(np.linalg.inv(b), a)
-            x[0,n] = x[0, n-1] + dx[0]
-            x[1,n] = x[1, n-1] + dx[1]
-            x[2,n] = x[2, n-1] + dx[2]
-            diff = abs( (module(x[0,n],x[1,n],x[2,n]) - module(x[0,n-1],x[1,n-1],x[2,n-1]) ) 
-                       / module(x[0,n-1],x[1,n-1],x[2,n-1]) )
-            if diff<tol:
-                # print("x1,x2,x3,f(x)", x[0,n], x[1,n],x[2,n], f(1/v1[j], u1, P1[j], x[0,n], x[1,n], x[2,n]) )
-                break
-            else:
-                n = n + 1
-        """
-        2.3 check M2=1?
-        """
-        d2 = x[0,n-1]
-        u2 = x[1,n-1]
-        P2 = x[2,n-1]
+        d2 = D2[i]
+        u2 = d1*u1/d2
+        P2 = d1*u1*u1 + P1[j] - d2*u2*u2
         c2 = CP.CoolProp.PropsSI('A','P', P2, 'Dmass', d2,  fluidname)
         M2 = u2/c2
-        # if abs(M2-1.0)<1e-3:
-        print(" n = ", n, "diff = ", diff, "M2 = ", M2)
-        PAD.append(P1[j])
-        VAD.append(v1[j])
-        PBD.append(P2)
-        VBD.append(1/d2)
-        break
+        G2 = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics', 'P',P2,'Dmass', d2,fluidname)
+        if abs(M2-1.0)<1e-3 and G2>0:
+            PAD.append(P1[j])
+            VAD.append(v1[j])
+            PBD.append(P2)
+            VBD.append(1/d2)
+            print("diff = ", f[i], "M2 = ", M2)
+    
+        
         
         
 
@@ -150,7 +144,7 @@ axes.plot(LSV.iloc[:,2],LSV.iloc[:,3],'b',lw = lw, label = "LVS")
 """
 X.2 Gamma = 0
 """
-axes.plot(GAMMA.iloc[:,2],GAMMA.iloc[:,3],'k--',lw = lw, label = "$\Gamma=0$")
+axes.plot(GAMMA.iloc[:,2],GAMMA.iloc[:,3],'g',lw = lw, label = "$\Gamma=0$")
 
 """
 X.3 Isentropy
@@ -165,8 +159,8 @@ VAD = np.array(VAD)
 PBD = np.array(PBD)
 VBD = np.array(VBD)
 
-axes.plot(VAD/vc,PAD/Pc,'ko',lw = lw, label = "pre")
-axes.plot(VBD/vc,PBD/Pc,'k+',lw = lw,label = "post")
+axes.plot(VAD/vc,PAD/Pc,'k',lw = lw, label = "pre")
+axes.plot(VBD/vc,PBD/Pc,'k--',lw = lw,label = "post")
 
 
 # DSL
