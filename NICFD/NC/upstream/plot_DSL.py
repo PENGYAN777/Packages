@@ -18,6 +18,10 @@ import scipy.interpolate
 import pandas as pd
 import math
 import time
+import os
+from IPython import get_ipython;   
+get_ipython().magic('reset -sf')
+os.system('clear')
 
 start = time.time()
 
@@ -67,49 +71,60 @@ PBD = []
 VBD = []
 
 M1 = 1.0
-
-s1 = np.linspace(507,520,5)
+count = 0
+s1 = np.linspace(506.5,520,11)
 s1 = pd.Series(s1)
 for k in s1.index:
     n1 = 50
     v1 = np.linspace(vc*1.2, vc*1.5 ,n1)
     v1 = pd.Series(v1)
     P1 = np.zeros(v1.size)
-    v2 = np.zeros(v1.size)
-    P2 = np.zeros(v1.size)
     for j in v1.index:
         d1 = 1/v1[j]
         P1[j] = CP.CoolProp.PropsSI('P','Dmass',d1,'Smass',s1[k],fluidname) 
+        G1 = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics', 'P',P1[j],'Dmass', d1,fluidname)
         c1 = CP.CoolProp.PropsSI('A','P', P1[j], 'Dmass', d1,  fluidname)
-        h1 =  CP.CoolProp.PropsSI('Hmass','P', P1[j], 'Dmass', d1,  fluidname)
         u1 = c1*M1
-        ht1 = h1 + 0.5*u1*u1
-        # Rayleigh line
-        n2 = 100
-        P2r = np.linspace(Pc*0.99, Pc*0.7 ,n2) # post-shock Mach
-        P2r = pd.Series(P2r)
-        v2r = np.zeros(P2r.size) 
-        diff = np.zeros(P2r.size) 
-        for i in P2r.index:
-             P = P2r[i]
-             v2r[i] = (1-(P-P1[j])*v1[j]/u1/u1)*v1[j]
-             d2 = 1/v2r[i]
-             ds = CP.CoolProp.PropsSI('Dmass','P', P, 'Q', 1,  fluidname)
-             if v2r[i]<1/ds:
-                 # print("two phase")
-                 continue
-             c2 = CP.CoolProp.PropsSI('A','P', P, 'Dmass', d2,  fluidname)
-             h2 =  CP.CoolProp.PropsSI('Hmass','P', P, 'Dmass', d2,  fluidname)
-             u2 = c2
-             diff[i] = abs(h2 + 0.5*u2*u2 - ht1)/ht1
-        i = np.argmin(diff)
-        if i>0:
-            print("k, j, i, diff: ", k, j, i , diff[i])
+        """
+        2.1 define function since f is alwasy positive, so can not use bisection method
+        """
+        def ns(d2,d1,u1,p1):
+            h1 = CP.CoolProp.PropsSI('Hmass','P', p1, 'Dmass', d1,  fluidname)
+            ht1 = h1 + 0.5*u1*u1
+            u2 = d1*u1/d2
+            p2 = d1*u1*u1 + p1 - d2*u2*u2
+            h2 = CP.CoolProp.PropsSI('Hmass','P', p2, 'Dmass', d2,  fluidname)
+            ht2 = h2 + 0.5*u2*u2 
+            return (ht1 - ht2)/ht1
+        # a = d1/1.1
+        # b = d1/5
+        # root, iterations = bisection_method(ns, d1,u1,P1[j], a, b)
+        # print("Approximate root:", root)
+        # print("Number of iterations:", iterations)
+        D2 = np.linspace(d1/1.1, d1/5 ,50)
+        f = ns(D2, d1, u1, P1[j])
+        i = np.argmin(abs(f)) 
+        """
+        2.2 check M2=1?
+        """
+        d2 = D2[i]
+        u2 = d1*u1/d2
+        P2 = d1*u1*u1 + P1[j] - d2*u2*u2
+        c2 = CP.CoolProp.PropsSI('A','P', P2, 'Dmass', d2,  fluidname)
+        M2 = u2/c2
+        G2 = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics', 'P',P2,'Dmass', d2,fluidname)
+        if abs(M2-1.0)<1e-3 and G2>0:
+            count = count + 1
             PAD.append(P1[j])
             VAD.append(v1[j])
-            PBD.append(P2r[i])
-            VBD.append(v2r[i])
-            break
+            PBD.append(P2)
+            VBD.append(1/d2)
+            print("diff = ", f[i], "M2 = ", M2)
+    
+print("count = ", count)     
+        
+        
+
     
 
 """
@@ -129,7 +144,7 @@ axes.plot(LSV.iloc[:,2],LSV.iloc[:,3],'b',lw = lw, label = "LVS")
 """
 X.2 Gamma = 0
 """
-axes.plot(GAMMA.iloc[:,2],GAMMA.iloc[:,3],'k--',lw = lw, label = "$\Gamma=0$")
+axes.plot(GAMMA.iloc[:,2],GAMMA.iloc[:,3],'g',lw = lw, label = "$\Gamma=0$")
 
 """
 X.3 Isentropy
@@ -144,8 +159,8 @@ VAD = np.array(VAD)
 PBD = np.array(PBD)
 VBD = np.array(VBD)
 
-axes.plot(VAD/vc,PAD/Pc,'k',lw = lw, label = "DSL")
-axes.plot(VBD/vc,PBD/Pc,'k',lw = lw)
+axes.plot(VAD/vc,PAD/Pc,'k',lw = lw, label = "pre")
+axes.plot(VBD/vc,PBD/Pc,'k--',lw = lw,label = "post")
 
 
 # DSL

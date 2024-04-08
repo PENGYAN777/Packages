@@ -89,53 +89,57 @@ smax = np.linspace(s-193, s-180, 1)
 smax = pd.Series(smax)
 for k in smax.index:
     """
-    2.1 isentropy P,v
+    2.1 P,v along isentropy 
     """
-    v1 = np.linspace(vc*4.0, vc*1.5,10) # P<Pc
+    v1 = np.linspace(vc*3.7, vc*2.0,1) # P<Pc
     v1 = pd.Series(v1)
     p1 = np.zeros(v1.size) 
-    for i in v1.index:
-        p1[i] = CP.CoolProp.PropsSI('P','Smass', smax[k], 'Dmass', 1/v1[i],  fluidname)
-    
-    """
-    2.2 find PSmax at which first post-compression sonic shock is observed when increasing P with max intensity or exhibit Gamma=0
-    """
     for j in v1.index:
-        d1 = 1/v1[j]
-        P1 = p1[j]
-        T1 = CP.CoolProp.PropsSI('T','P', P1, 'Dmass', d1,  fluidname)
-        c1 = CP.CoolProp.PropsSI('A','P|gas', P1, 'T', T1,  fluidname)
-        h1 =  CP.CoolProp.PropsSI('Hmass','P', P1, 'Dmass', d1,  fluidname)
-        M1 = 1.1
-        u1 = c1*M1
-        ht1 = h1 + 0.5*u1*u1
-        n2 = 200
-        P2 = np.linspace(P1, Pc*0.99 ,n2) # post-shock 
+        p1[j] = CP.CoolProp.PropsSI('P','Smass', smax[k], 'Dmass', 1/v1[j],  fluidname)
+        c1 =  CP.CoolProp.PropsSI('A','P', p1[j], 'Dmass', 1/v1[j],  fluidname)
+        h1 =  CP.CoolProp.PropsSI('Hmass','P', p1[j], 'Dmass', 1/v1[j],  fluidname)
+        s1 = smax[k]
+        """
+        2.2 find PSmax 
+        """
+        """
+        2.2.1 Rangking Hugoniot curve
+        """
+        n1 = 100
+        P2 = np.linspace(p1[j], Pc*0.99 ,n1) # post-shock 
         P2 = pd.Series(P2)
-        v2r = np.zeros(P2.size) # v2 for Rayleigh line
-        M2 = np.zeros(P2.size) 
-        for i in P2.index:
-             v2r[i] = (1-(P2[i]-P1)*v1[j]/u1/u1)*v1[j]
-             d2 = 1/v2r[i]
-             ds = CP.CoolProp.PropsSI('Dmass','P', P2[i], 'Q', 1,  fluidname)
-             if v2r[i]<1/ds:
-                 # print("two phase")
-                 continue
-             h2 = CP.CoolProp.PropsSI('Hmass','P', P2[i], 'Dmass', d2,  fluidname)
-             c2 = CP.CoolProp.PropsSI('A','P', P2[i], 'Dmass', d2,  fluidname)
-             u2 = math.sqrt(2*abs(ht1-h2))
-             M2[i] = u2/c2
-        i = np.argmin(abs(M2-1.0)) 
-        T = CP.CoolProp.PropsSI('T','P', P2[i], 'Dmass', 1/v2r[i],  fluidname)
-        G = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics','P|gas', P2[i], 'T', T,  fluidname)
-        print("k, j, i, M2, G2 ", k, j, i, M2[i], G)
-        print("P1/Pc, v1/vc, P2/Pc, v1/vc, ", p1[j]/Pc, v1[j]/vc, P2[i]/Pc, v2r[i]/vc)
-    break
-        # if abs(G)<0.01:
-        #     print("k, j, i, M2, G2 ", k, j, i, M2[i], G)
-        #     vsmax.append(v1[j])
-        #     psmax.append(p1[j])
-        #     break
+        v2 = np.zeros(P2.size) 
+        G2 = np.zeros(P2.size) 
+        s2 = np.zeros(P2.size) 
+        for l in P2.index:
+            P = P2[l]
+            # initial guess pf v2
+            n2 = 100
+            v = np.linspace(vc*1.5,vc*4.0 ,n2) 
+            v = pd.Series(v)
+            diff = np.zeros(v.size) 
+            for i in v.index:
+                diff[i] = CP.CoolProp.PropsSI('Hmass','P', P, 'Dmass', 1/v[i], fluidname) - h1 - 0.5*(P-p1[j])*(v1[j]+v[i])
+            # print("min index:", np.argmin(abs(diff)), "min diff: ", diff[np.argmin(abs(diff))])
+            v2[l] = v[np.argmin(abs(diff))]
+            G2[l] = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics', 'P',P2[l],'Dmass', 1/v2[l],fluidname)
+            s2[l] = CP.CoolProp.PropsSI('Smass','P', P2[l], 'Dmass', 1/v2[l],  fluidname)
+            if G2[l]<0:
+                splus1 = s2[np.argmax(abs(s2))]        
+                splus2 = s2[np.argmin((G2))]    
+                print("smax, s(G=0), ", splus1 , splus2)
+                if abs(splus1-splus2)/splus1 < 3e-3:
+                    vsmax.append(v1[j])
+                    vsmax.append(p1[j])
+                    print("k,j, diff ", k , j, abs(splus1-splus2)/splus1)
+                    break
+                break
+
+        
+    
+
+    
+
 
 
 
@@ -177,6 +181,8 @@ X.5 PSmax
 """
 vsmax = np.array(vsmax)
 psmax = np.array(psmax)
+axes.plot(v1/vc, p1/Pc,'bo',lw = lw)
+axes.plot(v2/vc, P2/Pc,'b+',lw = lw)
 # axes.plot(vsmax/vc, psmax/Pc,'b+',lw = lw)
 
 

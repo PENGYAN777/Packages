@@ -34,7 +34,10 @@ def bisection_method(f,p1,p2,p3, a, b, tol=1e-4, max_iterations=100):
     if f(a,p1,p2,p3) * f(b,p1,p2,p3) >= 0:
         # print("a,b ", a,b)
         # print("p1,p2,p3 ", p1,p2,p3)
-        print("f(a), f(b) ", f(a,p1,p2,p3),f(b,p1,p2,p3) )
+        # print("f(a), f(b) ", f(a,p1,p2,p3),f(b,p1,p2,p3) )
+        # c = 666
+        # iteration = 777
+        # return c, iteration 
         raise ValueError("The function values at the endpoints must have opposite signs.")
 
     iteration = 0
