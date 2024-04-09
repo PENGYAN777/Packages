@@ -120,7 +120,8 @@ for k in s1.index:
             VAD.append(v1[j])
             PBD.append(P2)
             VBD.append(1/d2)
-            print("diff = ", f[i], "M2 = ", M2)
+            print("k, ", k, "diff = ", f[i], "M2 = ", M2)
+            break
     
 print("count = ", count)     
         

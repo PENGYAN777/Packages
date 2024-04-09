@@ -64,7 +64,6 @@ GAMMA = pd.read_csv("GAMMA.csv", ",", skiprows=0)
 1.3 Double sonic locus
 """
 DSL = pd.read_csv("DSL.csv", ",", skiprows=0)
-DSL = DSL[::-1]
 
 """
 1.4 Isentropy
@@ -72,12 +71,14 @@ DSL = DSL[::-1]
 v = vc*2.5
 p = Pc*1.05
 s = CP.CoolProp.PropsSI('Smass','P', p, 'Dmass', 1/v,  fluidname)
+
 # S_tau
 vt = np.linspace(vc*0.5, vc*4.0,500) # P<Pc
 vt = pd.Series(vt)
 pt = np.zeros(vt.size) 
 for i in vt.index:
     pt[i] = CP.CoolProp.PropsSI('P','Smass', s-176, 'Dmass', 1/vt[i],  fluidname)
+    
 # S_vle    
 vv = np.linspace(vc*0.5, vc*4.0,500) # P<Pc
 vv = pd.Series(vv)
@@ -85,10 +86,16 @@ pv = np.zeros(vv.size)
 for i in vv.index:
     pv[i] = CP.CoolProp.PropsSI('P','Smass', s-193, 'Dmass', 1/vv[i],  fluidname)
 
+# smin
+vm = np.linspace(vc*0.5, vc*4.0,500) # P<Pc
+vm = pd.Series(vm)
+pm = np.zeros(vm.size) 
+for i in vm.index:
+    pm[i] = CP.CoolProp.PropsSI('P','Smass', s-218, 'Dmass', 1/vm[i],  fluidname)
+
 """
-1.5 PSmax
+2. PSat
 """
-smax = pd.read_csv("PSmax.csv", ",", skiprows=0)
 
         
     
@@ -123,17 +130,25 @@ X.3 Isentropy
 # axes.plot(vt/vc,pt/Pc,'k--',lw = lw/2, label = "$s_\\tau$")
 # axes.plot(vv/vc,pv/Pc,'k-.',lw = lw/2, label = "$s_{vle}$")
 axes.plot(vt/vc,pt/Pc,'k--',lw = lw/2)
-axes.plot(vv/vc,pv/Pc,'k-.',lw = lw/2)
+axes.plot(vv/vc,pv/Pc,'k--',lw = lw/2)
+axes.plot(vm/vc,pm/Pc,'k-.',lw = lw/2)
 
 
 """
-X.4 DSL + PSmax
+X.4 Double sonic locus
 """
-boundaryv = np.concatenate( ( smax.iloc[:,2], DSL.iloc[:,2], np.array([1.19]) ) )
-boundaryp = np.concatenate( ( smax.iloc[:,3], DSL.iloc[:,3], np.array([0.99]) ) )
 
-axes.plot(boundaryv, boundaryp, 'b',lw = lw, label = "boundary")
+axes.plot(DSL.iloc[:,2], DSL.iloc[:,3],'b',lw = lw, label = "DSL")
+# axes.plot(DSL.iloc[:,4], DSL.iloc[:,5],'k',lw = lw)
 
+"""
+X.5 PSmax
+"""
+# vsmax = np.array(vsmax)
+# psmax = np.array(psmax)
+# axes.plot(v1/vc, p1/Pc,'bo',lw = lw)
+# axes.plot(v2/vc, P2/Pc,'b+',lw = lw)
+# axes.plot(vsmax/vc, psmax/Pc,'bo',lw = lw, label = "PSmax")
 
 
 
@@ -143,11 +158,16 @@ axes.set_xlabel('$v/v_c$')
 axes.set_ylabel('$P/P_c$')
 plt.title('Upstream state map for siloxane MD$_4$M')
 axes.legend(loc=0) # 2 means left top
-fig1.savefig("map.pdf") 
+# fig1.savefig("psmax.pdf") 
 
 """
 X.1 write into csv file
 """
+# pd.DataFrame(vsmax/vc).to_csv('PSmax.csv', index_label = "Index", header  = ['vsmax/vc']) 
+# data = pd.read_csv("PSat.csv", ",")
+# D =pd.DataFrame({'psat/Pc': psmax/Pc, })
+# newData = pd.concat([data, D], join = 'outer', axis = 1)
+# newData.to_csv("PSat.csv")
 
 end = time.time()
 print("computational time(s): ", end - start)

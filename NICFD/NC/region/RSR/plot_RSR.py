@@ -134,8 +134,9 @@ X.3 Isentropy
 """
 X.4 Double sonic locus
 """
-
-axes.plot(DSL.iloc[:,2], DSL.iloc[:,3],'k',lw = lw, label = "DSL")
+bv = np.concatenate( (  np.array([1.19]), DSL.iloc[:,2] ) )
+bp = np.concatenate( ( np.array([0.99]), DSL.iloc[:,3] ) )
+axes.plot(bv, bp,'k',lw = lw, label = "DSL")
 axes.plot(DSL.iloc[:,4], DSL.iloc[:,5],'k',lw = lw)
 
 """
