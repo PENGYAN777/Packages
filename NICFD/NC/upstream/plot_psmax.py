@@ -211,7 +211,7 @@ axes.set_xlabel('$v/v_c$')
 axes.set_ylabel('$P/P_c$')
 plt.title('Upstream state map for siloxane MD$_4$M')
 axes.legend(loc=0) # 2 means left top
-fig1.savefig("psmax.pdf") 
+# fig1.savefig("psmax.pdf") 
 
 """
 X.1 write into csv file

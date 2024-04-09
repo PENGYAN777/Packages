@@ -72,12 +72,14 @@ DSL = DSL[::-1]
 v = vc*2.5
 p = Pc*1.05
 s = CP.CoolProp.PropsSI('Smass','P', p, 'Dmass', 1/v,  fluidname)
+
 # S_tau
 vt = np.linspace(vc*0.5, vc*4.0,500) # P<Pc
 vt = pd.Series(vt)
 pt = np.zeros(vt.size) 
 for i in vt.index:
     pt[i] = CP.CoolProp.PropsSI('P','Smass', s-176, 'Dmass', 1/vt[i],  fluidname)
+    
 # S_vle    
 vv = np.linspace(vc*0.5, vc*4.0,500) # P<Pc
 vv = pd.Series(vv)
@@ -85,12 +87,24 @@ pv = np.zeros(vv.size)
 for i in vv.index:
     pv[i] = CP.CoolProp.PropsSI('P','Smass', s-193, 'Dmass', 1/vv[i],  fluidname)
 
+# smin
+vm = np.linspace(vc*0.5, vc*4.0,500) # P<Pc
+vm = pd.Series(vm)
+pm = np.zeros(vm.size) 
+for i in vm.index:
+    pm[i] = CP.CoolProp.PropsSI('P','Smass', s-218, 'Dmass', 1/vm[i],  fluidname)
+
 """
 1.5 PSmax
 """
 smax = pd.read_csv("PSmax.csv", ",", skiprows=0)
 
-        
+"""
+1.6 PSat
+"""
+sat = pd.read_csv("PSat.csv", ",", skiprows=0)
+# sat = sat[::-1]
+
     
 
     
@@ -124,15 +138,18 @@ X.3 Isentropy
 # axes.plot(vv/vc,pv/Pc,'k-.',lw = lw/2, label = "$s_{vle}$")
 axes.plot(vt/vc,pt/Pc,'k--',lw = lw/2)
 axes.plot(vv/vc,pv/Pc,'k-.',lw = lw/2)
+axes.plot(vm/vc,pm/Pc,'k--',lw = lw/2)
 
 
 """
 X.4 DSL + PSmax
 """
-boundaryv = np.concatenate( ( smax.iloc[:,2], DSL.iloc[:,2], np.array([1.19]) ) )
-boundaryp = np.concatenate( ( smax.iloc[:,3], DSL.iloc[:,3], np.array([0.99]) ) )
+bv = np.concatenate( ( np.array([GAMMA.iloc[0,2]]), sat.iloc[:,2], 
+                      smax.iloc[:,2], DSL.iloc[:,2], np.array([1.19]),  ) )
+bp = np.concatenate( ( np.array([GAMMA.iloc[0,3]]), sat.iloc[:,3],
+                      smax.iloc[:,3], DSL.iloc[:,3], np.array([0.99]),  ) )
 
-axes.plot(boundaryv, boundaryp, 'b',lw = lw, label = "boundary")
+axes.plot(bv, bp, 'b',lw = lw, label = "boundary")
 
 
 

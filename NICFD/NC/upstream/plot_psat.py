@@ -97,8 +97,63 @@ for i in vm.index:
 2. PSat
 """
 
-        
-    
+vsat = []
+psat = []
+sat = np.linspace(s-210, s-200, 2)
+# smax = [s-200  ] v1 = np.linspace(vc*3.5, vc*2.5,10)
+# smax = [s-203  ]
+# smax = [s-206  ]
+sat = pd.Series(sat)
+for k in sat.index:
+    """
+    2.1 P,v along isentropy 
+    """
+    if k == 0:
+        v1 = np.linspace(vc*3.0, vc*2.5,10) 
+    else:
+        v1 = np.linspace(vc*3.5, vc*2.5,10)
+    v1 = pd.Series(v1)
+    p1 = np.zeros(v1.size) 
+    diffs = np.zeros(v1.size) 
+    for j in v1.index:
+        p1[j] = CP.CoolProp.PropsSI('P','Smass', sat[k], 'Dmass', 1/v1[j],  fluidname)
+        c1 =  CP.CoolProp.PropsSI('A','P', p1[j], 'Dmass', 1/v1[j],  fluidname)
+        h1 =  CP.CoolProp.PropsSI('Hmass','P', p1[j], 'Dmass', 1/v1[j],  fluidname)
+        """
+        2.2 find PSat
+        """
+        """
+        2.2.1 Rangking Hugoniot curve
+        """
+        n1 = 100
+        P2 = np.linspace(p1[j], Pc*0.99 ,n1) # post-shock 
+        P2 = pd.Series(P2)
+        v2 = np.zeros(P2.size) 
+        s2 = np.zeros(P2.size) 
+        for l in P2.index:
+            P = P2[l]
+            # initial guess pf v2
+            n2 = 100
+            v = np.linspace(vc*4.0,vc*1.1 ,n2) 
+            v = pd.Series(v)
+            diff = np.zeros(v.size) 
+            for i in v.index:
+                diff[i] = CP.CoolProp.PropsSI('Hmass','P', P, 'Dmass', 1/v[i], fluidname) - h1 - 0.5*(P-p1[j])*(v1[j]+v[i])
+            # print("min index:", np.argmin(abs(diff)), "min diff: ", diff[np.argmin(abs(diff))])
+            v2[l] = v[np.argmin(abs(diff))]
+            phase = CP.CoolProp.PropsSI('Phase','P', P2[l], 'Dmass', 1/v2[l],  fluidname)
+            s2[l] = CP.CoolProp.PropsSI('Smass','P', P2[l], 'Dmass', 1/v2[l],  fluidname)
+            if phase == 6:
+                # print("two phase: ", phase)
+                splus1 = s2[np.argmax(abs(s2))]        
+                splus2 = s2[l]    
+                diffs[j] = abs(splus1-splus2)/splus1 
+                break
+    i = np.argmin(diffs)
+    vsat.append(v1[i])
+    psat.append(p1[i])
+    print("k,i, diff ", k , i, diffs[i] )
+                
 
     
 
@@ -131,7 +186,7 @@ X.3 Isentropy
 # axes.plot(vv/vc,pv/Pc,'k-.',lw = lw/2, label = "$s_{vle}$")
 axes.plot(vt/vc,pt/Pc,'k--',lw = lw/2)
 axes.plot(vv/vc,pv/Pc,'k--',lw = lw/2)
-axes.plot(vm/vc,pm/Pc,'k-.',lw = lw/2)
+axes.plot(vm/vc,pm/Pc,'k--',lw = lw/2)
 
 
 """
@@ -142,13 +197,13 @@ axes.plot(DSL.iloc[:,2], DSL.iloc[:,3],'b',lw = lw, label = "DSL")
 # axes.plot(DSL.iloc[:,4], DSL.iloc[:,5],'k',lw = lw)
 
 """
-X.5 PSmax
+X.5 PSat
 """
-# vsmax = np.array(vsmax)
-# psmax = np.array(psmax)
+vsat = np.array(vsat)
+psat = np.array(psat)
 # axes.plot(v1/vc, p1/Pc,'bo',lw = lw)
 # axes.plot(v2/vc, P2/Pc,'b+',lw = lw)
-# axes.plot(vsmax/vc, psmax/Pc,'bo',lw = lw, label = "PSmax")
+axes.plot(vsat/vc, psat/Pc,'bo',lw = lw, label = "PSat")
 
 
 
@@ -163,11 +218,11 @@ axes.legend(loc=0) # 2 means left top
 """
 X.1 write into csv file
 """
-# pd.DataFrame(vsmax/vc).to_csv('PSmax.csv', index_label = "Index", header  = ['vsmax/vc']) 
-# data = pd.read_csv("PSat.csv", ",")
-# D =pd.DataFrame({'psat/Pc': psmax/Pc, })
-# newData = pd.concat([data, D], join = 'outer', axis = 1)
-# newData.to_csv("PSat.csv")
+pd.DataFrame(vsat/vc).to_csv('PSat.csv', index_label = "Index", header  = ['vsat/vc']) 
+data = pd.read_csv("PSat.csv", ",")
+D =pd.DataFrame({'psat/Pc': psat/Pc, })
+newData = pd.concat([data, D], join = 'outer', axis = 1)
+newData.to_csv("PSat.csv")
 
 end = time.time()
 print("computational time(s): ", end - start)
