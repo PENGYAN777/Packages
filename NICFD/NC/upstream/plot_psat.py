@@ -117,7 +117,7 @@ for k in sat.index:
     diffs = np.zeros(v1.size) 
     for j in v1.index:
         p1[j] = CP.CoolProp.PropsSI('P','Smass', sat[k], 'Dmass', 1/v1[j],  fluidname)
-        c1 =  CP.CoolProp.PropsSI('A','P', p1[j], 'Dmass', 1/v1[j],  fluidname)
+        # c1 =  CP.CoolProp.PropsSI('A','P', p1[j], 'Dmass', 1/v1[j],  fluidname)
         h1 =  CP.CoolProp.PropsSI('Hmass','P', p1[j], 'Dmass', 1/v1[j],  fluidname)
         """
         2.2 find PSat
