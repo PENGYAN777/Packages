@@ -107,12 +107,105 @@ sat = pd.read_csv("PSat.csv", ",", skiprows=0)
 
     
 """
-1.7 Mach transion
+2. Mach transion
 """
+l1 = 6
+l2 = 3
+V1 =np.zeros((l1,l2)) 
+P1 =np.zeros((l1,l2))
+M1 =np.zeros((l1,l2))  
+s1 = np.array([s- 215, s-213, s-200, s-193, s-185, s-178,])
+s1 = pd.Series(s1)
+for k in s1.index:
+    count = 0 # record the type of shock, classical 0 or non-classical 1 
+    """
+    2.1 P,v along isentropy and within upstream map
+    """
+    if k == 0:
+        v1 = np.linspace(vc*2.8, vc*2.3, l2) 
+    if k == 1:
+        v1 = np.linspace(vc*3.0, vc*2.2, l2) 
+    if k == 2:
+        v1 = np.linspace(vc*3.5, vc*1.78, l2) 
+    if k == 3:
+        v1 = np.linspace(vc*3.7, vc*1.2, l2) 
+    if k == 4:
+        v1 = np.linspace(vc*2.4, vc*1.26, l2) 
+    if k == 5:
+        v1 = np.linspace(vc*2.2, vc*1.4, l2) 
+    v1 = pd.Series(v1)
+    p1 = np.zeros(v1.size) 
+    m1 = np.zeros(v1.size) 
+    c1 = np.zeros(v1.size) 
+    ps = np.zeros(v1.size) 
+    vs = np.zeros(v1.size) 
+    for j in v1.index:
+        p1[j] = CP.CoolProp.PropsSI('P','Smass', s1[k], 'Dmass', 1/v1[j],  fluidname)
+        h1 =  CP.CoolProp.PropsSI('Hmass','P', p1[j], 'Dmass', 1/v1[j],  fluidname)
+        phase1 = CP.CoolProp.PropsSI('Phase','P', p1[j], 'Dmass', 1/v1[j],  fluidname)
+        if phase1 == 6:
+            continue
+        c1[j] =  CP.CoolProp.PropsSI('A','P', p1[j], 'Dmass', 1/v1[j],  fluidname)
+        G1 = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics', 'P',p1[j],'Dmass', 1/v1[j],fluidname)
+        if G1<0:
+            count = 1
+        """
+        2.2 Rangking Hugoniot curve
+        """
+        n1 = 200
+        if count == 0:
+            v2 = np.linspace(v1[j], vc*1.5 ,n1) # classical shock
+        if count == 1:
+            v2 = np.linspace(v1[j], vc*3.7 ,n1) # non-classical shock
+        v2 = pd.Series(v2)
+        P2 = np.zeros(v2.size) 
+        s2 = np.zeros(v2.size) 
+        G2 = np.zeros(v2.size) 
+        for l in v2.index:
+            # initial guess pf v2
+            n2 = 200
+            if count == 0:
+                P = np.linspace(p1[j],Pc*1.0 ,n2) 
+            if count == 1:
+                P = np.linspace(p1[j],Pc*0.6 ,n2) 
+            P = pd.Series(P)
+            diff = np.zeros(P.size) 
+            for i in P.index:
+                diff[i] = CP.CoolProp.PropsSI('Hmass','P', P[i], 'Dmass', 1/v2[l], fluidname) - h1 - 0.5*(P[i]-p1[j])*(v1[j]+v2[l])
+            # print("min index:", np.argmin(abs(diff)), "min diff: ", diff[np.argmin(abs(diff))])
+            P2[l] = P[np.argmin(abs(diff))]
+            phase2 = CP.CoolProp.PropsSI('Phase','P', P2[l], 'Dmass', 1/v2[l],  fluidname)
+            if phase2 == 6: # two phase
+                G2[l] = 0
+            else:
+                G2[l] = CP.CoolProp.PropsSI('fundamental_derivative_of_gas_dynamics', 'P',P2[l],'Dmass', 1/v2[l],fluidname)
+            if count == 0:
+                if G2[l]<0:
+                    s2[l] = CP.CoolProp.PropsSI('Smass','P', P2[l], 'Dmass', 1/v2[l],  fluidname)
+            if count == 1:
+                if G2[l]>0:
+                    s2[l] = CP.CoolProp.PropsSI('Smass','P', P2[l], 'Dmass', 1/v2[l],  fluidname)
+        """
+        2.3 find Smax
+        """
+        i = np.argmax(abs(s2))
+        ps[j] = P2[i]
+        vs[j] = v2[i]
+        hs =  CP.CoolProp.PropsSI('Hmass','P', ps[j], 'Dmass', 1/vs[j],  fluidname)
+        cs = CP.CoolProp.PropsSI('A','P', ps[j], 'Dmass', 1/vs[j],  fluidname)
+        ms = 1.0
+        us = cs*ms
+        hts = hs + 0.5*us*us
+        u1 = np.sqrt( 2*(hts-h1) )
+        m1[j] = u1/c1[j]
+        # m1[j] = v1[j]/c1[j]*np.sqrt( (ps-p1[j]) / (v1[j]-vs) )
+        print("k, j, m1, ", k, j , m1[j])
+        if m1[j]<1:
+            m1[j] = 1.0
+        V1[k,j] = v1[j]
+        P1[k,j] = p1[j]
+        M1[k,j] = m1[j]
 
-V1 = np.genfromtxt('contour_v1.csv', delimiter=',')
-P1 = np.genfromtxt('contour_p1.csv', delimiter=',')
-M1 = np.genfromtxt('contour_m1.csv', delimiter=',')
 
 """
 X. plot
@@ -156,11 +249,14 @@ axes.plot(bv, bp, 'b',lw = lw, label = "boundary")
 X.5 Mach number
 """
 
+axes.plot(v1/vc,p1/Pc,'ko',lw = lw/2)
+axes.plot(vs/vc,ps/Pc,'k+',lw = lw/2)
+
 """
 X.6 Contour of Mach number
 """
 levels = [1.0, 1.05, 1.10, 1.15, 1.2]
-plt.contourf(V1, P1, M1,  cmap='rainbow', linewidths=lw/10)
+plt.contourf(V1/vc, P1/Pc, M1,  cmap='rainbow', linewidths=lw/10)
 plt.colorbar()
 
 
