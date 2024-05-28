@@ -163,6 +163,18 @@ levels = [1.0, 1.05, 1.10, 1.15, 1.2]
 plt.contourf(V1, P1, M1,  cmap='rainbow', linewidths=lw/10)
 plt.colorbar()
 
+"""
+X.7 pre and post shock condition
+"""
+P1 = 0.99*Pc
+d1 = 0.80*dc
+v1 = 1/d1
+axes.plot(v1/vc, P1/Pc, 'k+',lw = lw, label = "Pre")
+
+P2 = 0.887*Pc
+d2 = 0.522*dc
+v2 = 1/d2
+axes.plot(v2/vc, P2/Pc, 'k*',lw = lw, label = "Post")
 
 axes.set_ylim([0.6, 1.1])
 axes.set_xlim([0.7, 4.0])
@@ -175,9 +187,9 @@ fig1.savefig("map.pdf")
 """
 X.1 write into csv file
 """
-np.savetxt('contour_v1.csv',V1/vc,delimiter=",")
-np.savetxt('contour_p1.csv',P1/Pc,delimiter=",")
-np.savetxt('contour_m1.csv',M1,delimiter=",")
+# np.savetxt('contour_v1.csv',V1/vc,delimiter=",")
+# np.savetxt('contour_p1.csv',P1/Pc,delimiter=",")
+# np.savetxt('contour_m1.csv',M1,delimiter=",")
 
 end = time.time()
 print("computational time(s): ", end - start)
