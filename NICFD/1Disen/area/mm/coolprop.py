@@ -18,6 +18,10 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 import CoolProp as CP
 from newIOpairs import TGfromZP, PGfromZT, PTfromZG, ZPfromTG, ZTfromPG, ZGfromPT
+import time
+
+# Start time
+start_time = time.time()
 
 """
 0. fluid property
@@ -39,7 +43,7 @@ print("critical pressure[Pa]:", Pc)
 1. input total conditions
 """
 
-pt = 1.3e6 # total pressure
+pt = 1.4e6 # total pressure
 print("total pressure[Pa]:", pt)
 zt = 0.6 # total compressibility factor
 print("total compressibility factor", zt)
@@ -57,8 +61,9 @@ print("total enthalpy:", ht)
 """
 2. read area ratio
 """
-wall = pd.read_csv("nozzle.csv", " ", skiprows=0)
-A = wall.iloc[:,2]
+# wall = pd.read_csv("nozzle.csv", " ", skiprows=0)
+wall = pd.read_csv("nozzle.dat", ",", skiprows=0)
+A = wall.iloc[:,1]
 Astar = A[np.argmin(abs(A))]
 Ar = A/Astar # A/A^*, i.e., area ratio
 x = A = wall.iloc[:,1]
@@ -184,6 +189,12 @@ newData = pd.concat([data, d], join = 'outer', axis = 1)
 # newData.to_csv("m4sh.csv")
 newData.to_csv("z6.csv")
 
+# End time
+end_time = time.time()
+
+# Elapsed time
+elapsed_time = end_time - start_time
+print(f"Elapsed time: {elapsed_time} seconds")
 
 
 
